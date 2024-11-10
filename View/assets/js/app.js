@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     var togglePasswordIcons = document.querySelectorAll('.toggle-password');
+    var togglePasswordIconsEdit = document.querySelectorAll('.show-pass-word');
     togglePasswordIcons.forEach(function (icon) {
         icon.addEventListener('click', function () {
             var passwordInput = icon.previousElementSibling;
@@ -19,4 +20,18 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
+    togglePasswordIconsEdit.forEach(function (icon) {
+        icon.addEventListener('click', function () {
+            var passwordInput = this.previousElementSibling;
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                this.innerHTML = '<i class="fa fa-eye-slash"></i>';
+            } else {
+                passwordInput.type = 'password';
+                this.innerHTML = '<i class="fa fa-eye"></i>';
+            }
+        });
+    });
 });
+
+    
