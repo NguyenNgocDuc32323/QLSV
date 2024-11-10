@@ -43,6 +43,7 @@ class LoginController {
                     $_SESSION['ten_dang_nhap'] = $username;
                     $_SESSION['login'] = $row['id'];
                     $_SESSION['is_logged_in'] = true;
+                    $_SESSION['login_success'] = "Đăng Nhập Thành Công!";
                     if ($remember) {
                         setcookie('ten_dang_nhap', $username, time() + (86400 * 30), "/", "", isset($_SERVER["HTTPS"]), true);
                         setcookie('mat_khau', $password, time() + (86400 * 30), "/", "", isset($_SERVER["HTTPS"]), true);

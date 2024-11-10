@@ -1,8 +1,13 @@
 <?php
-session_start(); 
-// Kiểm tra xem người dùng đã đăng nhập chưa
+session_start();
 $isLoggedIn = isset($_SESSION['is_logged_in']) && $_SESSION['is_logged_in'];
+if (isset($_SESSION['login_success']) && $_SESSION['login_success']) {
+    $login_success = $_SESSION['login_success'];
+    echo "<script class='text-success'>alert('{$login_success}');</script>";
+    unset($_SESSION['login_success']);
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
