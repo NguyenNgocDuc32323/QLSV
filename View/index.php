@@ -71,6 +71,10 @@ if (isset($_SESSION['login_success']) && $_SESSION['login_success']) {
 
 
                             <?php else: ?>
+                            <a href="profile.php" class="tutorial-body-bottom-item">
+                                <i class="far fa-edit"></i>
+                                <div id="text-guide-model3d">Chỉnh Sửa Cá Nhân</div>
+                            </a>
                             <a href="login.php" class="tutorial-body-bottom-item">
                                 <i class="fa-solid fa-right-to-bracket"></i>
                                 <div id="text-guide-model3d">Đăng Nhập</div>

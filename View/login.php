@@ -16,9 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $loginController->login($conn);
 }
 
-$username = isset($_COOKIE['ten_dang_nhap']) ? $_COOKIE['ten_dang_nhap'] : '';
+$email = isset($_COOKIE['email']) ? $_COOKIE['email'] : '';
 $password = isset($_COOKIE['mat_khau']) ? $_COOKIE['mat_khau'] : '';
-$rememberChecked = (isset($_COOKIE['ten_dang_nhap']) && isset($_COOKIE['mat_khau'])) ? 'checked' : '';
+$rememberChecked = (isset($_COOKIE['email']) && isset($_COOKIE['mat_khau'])) ? 'checked' : '';
 ?>
 
 <!DOCTYPE html>
@@ -37,8 +37,8 @@ $rememberChecked = (isset($_COOKIE['ten_dang_nhap']) && isset($_COOKIE['mat_khau
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap-grid.min.css"
             integrity="sha512-i1b/nzkVo97VN5WbEtaPebBG8REvjWeqNclJ6AItj7msdVcaveKrlIIByDpvjk5nwHjXkIqGZscVxOrTb9tsMA=="
             crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <title>Login</title>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <title>Login</title>
     </head>
 
     <body>
@@ -53,6 +53,7 @@ $rememberChecked = (isset($_COOKIE['ten_dang_nhap']) && isset($_COOKIE['mat_khau
                                         <img src="./assets/images/logo.webp" alt="logo">
                                     </a>
                                     <h3>Đăng Nhập Tài Khoản</h3>
+
                                     <?php if (isset($errors) && !empty($errors)) { ?>
                                     <div class="errors">
                                         <ul>
@@ -68,11 +69,9 @@ $rememberChecked = (isset($_COOKIE['ten_dang_nhap']) && isset($_COOKIE['mat_khau
                                     <?php endif; ?>
 
                                     <form method="POST" action="">
-
                                         <div class="form-group form-box">
-                                            <input type="text" name="ten_dang_nhap" class="form-control"
-                                                placeholder="Tên Đăng Nhập"
-                                                value="<?php echo htmlspecialchars($username); ?>" required>
+                                            <input type="email" name="email" class="form-control" placeholder="Email"
+                                                value="<?php echo htmlspecialchars($email); ?>" required>
                                         </div>
                                         <div class="form-group form-box position-relative">
                                             <input type="password" name="mat_khau" class="form-control"

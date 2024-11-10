@@ -10,51 +10,57 @@ class LoginController {
 
         $errors = [];
 
-        if (isset($_COOKIE['ten_dang_nhap']) && isset($_COOKIE['mat_khau'])) {
-            $username = $_COOKIE['ten_dang_nhap'];
+        if (isset($_COOKIE['email']) && isset($_COOKIE['mat_khau'])) {
+            $email = $_COOKIE['email'];
             $password = $_COOKIE['mat_khau'];
-            $remember = true; 
+            $remember = true;
             $userModel = new User($conn);
-            $result = $userModel->checkLogin($username, $password);
+            $result = $userModel->checkLogin($email, $password);
 
             if ($result && $result->num_rows > 0) {
                 $row = $result->fetch_assoc();
-                $_SESSION['ten_dang_nhap'] = $username;
+                $_SESSION['email'] = $email;
                 $_SESSION['login'] = $row['id'];
                 $_SESSION['is_logged_in'] = true;
-
+                
+                $_SESSION['login_success'] = true; // Đăng nhập thành công
                 header('Location: index.php');
                 exit();
             }
         }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-            $username = $_POST['ten_dang_nhap'] ?? '';
+            $email = $_POST['email'] ?? '';
             $password = $_POST['mat_khau'] ?? '';
-            $remember = isset($_POST['remember']) ? $_POST['remember'] : null; 
-            if (empty($username)) $errors['ten_dang_nhap'] = 'Tên đăng nhập là bắt buộc!';
+            $remember = isset($_POST['remember']) ? $_POST['remember'] : null;
+            
+            if (empty($email)) $errors['email'] = 'Email là bắt buộc!';
             if (empty($password)) $errors['mat_khau'] = 'Mật khẩu là bắt buộc!';
+            
             if (empty($errors)) {
                 $userModel = new User($conn);
-                $result = $userModel->checkLogin($username, $password);
+                $result = $userModel->checkLogin($email, $password);
 
                 if ($result && $result->num_rows > 0) {
                     $row = $result->fetch_assoc();
-                    $_SESSION['ten_dang_nhap'] = $username;
+                    $_SESSION['email'] = $email;
                     $_SESSION['login'] = $row['id'];
                     $_SESSION['is_logged_in'] = true;
                     $_SESSION['login_success'] = "Đăng Nhập Thành Công!";
                     if ($remember) {
-                        setcookie('ten_dang_nhap', $username, time() + (86400 * 30), "/", "", isset($_SERVER["HTTPS"]), true);
+                        setcookie('email', $email, time() + (86400 * 30), "/", "", isset($_SERVER["HTTPS"]), true);
                         setcookie('mat_khau', $password, time() + (86400 * 30), "/", "", isset($_SERVER["HTTPS"]), true);
                     } else {
-                        setcookie('ten_dang_nhap', '', time() - 3600, "/");
+                        setcookie('email', '', time() - 3600, "/");
                         setcookie('mat_khau', '', time() - 3600, "/");
                     }
+
+                    $_SESSION['login_success'] = true; // Thêm biến session cho đăng nhập thành công
+                    
                     header('Location: index.php');
                     exit();
                 } else {
-                    $_SESSION['errors'] = ['Thông tin đăng nhập không đúng.'];
+                    $_SESSION['login_failure'] = 'Thông tin đăng nhập không đúng.'; // Lưu thông báo lỗi
                     header('Location: login.php');
                     exit();
                 }
