@@ -131,12 +131,12 @@
     background-color: #fff;
 }
 
-.checkbox-theme input[type="checkbox"]:checked + label::before {
+.checkbox-theme input[type="checkbox"]:checked+label::before {
     background-color: #45BF55;
     border-color: #45BF55;
 }
 
-.checkbox-theme input[type=checkbox]:checked + label:before {
+.checkbox-theme input[type=checkbox]:checked+label:before {
     font-weight: 600;
     color: #fff;
     line-height: 19px;
@@ -334,33 +334,42 @@
     background: url('../images/img-50.png') top left repeat;
 }
 
-.see-password{
+.see-password {
     position: absolute;
     right: -25px;
     top: 39%;
     transform: translateY(-50%);
 }
-.text-left{
+
+.text-left {
     text-align: left;
 }
-.form-label{
+
+.form-label {
     font-weight: 600;
     padding-bottom: 10px;
     display: block;
     font-size: 18px;
     color: #45BF55;
 }
-.form-select{
+
+.form-select {
     width: 502px;
     height: 57px;
     color: #45BF55;
 }
-.form-select option{
+
+.form-select option {
     color: #45BF55;
 }
-.password-form .position-absolute{
+
+.password-form .position-absolute {
     position: absolute;
     right: 0;
     top: 50%;
     transform: translateY(-50%);
+}
+
+.text-danger {
+    color: red;
 }

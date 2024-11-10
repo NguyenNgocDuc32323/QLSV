@@ -19,5 +19,29 @@ class User {
         $stmt->execute();
         return $stmt->get_result();
     }
+
+     // Check if email already exists in the database
+    public function checkEmailExists($email) {
+        $query = "SELECT id FROM nguoidung WHERE email = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        return $stmt->get_result()->num_rows > 0; // Return true if email exists
+    }
+
+    // Register a new user
+   public function registerUser($username, $email, $password, $phone, $gender, $birth) {
+    // Hash the password using SHA-1
+    $hashed_password = sha1($password);  // Hash password with SHA-1
+
+    // Insert the user into the database
+    $query = "INSERT INTO nguoidung (ho_ten, email, mat_khau, so_dien_thoai, gioi_tinh, ngay_sinh) 
+              VALUES (?, ?, ?, ?, ?, ?)";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bind_param("ssssss", $username, $email, $hashed_password, $phone, $gender, $birth);
+
+    return $stmt->execute(); // Return true if insertion was successful
+}
+
 }
 ?>
