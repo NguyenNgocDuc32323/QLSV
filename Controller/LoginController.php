@@ -55,7 +55,7 @@ class LoginController {
                         setcookie('mat_khau', '', time() - 3600, "/");
                     }
 
-                    $_SESSION['login_success'] = true; // Thêm biến session cho đăng nhập thành công
+                    $_SESSION['login_success'] = "Đgit ăng nhập thành công"; // Thêm biến session cho đăng nhập thành công
                     
                     header('Location: index.php');
                     exit();
