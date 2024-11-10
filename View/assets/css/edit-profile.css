@@ -1,0 +1,79 @@
+.dashboard-main-body {
+    padding: 0 1.5rem;
+}
+.dashboard-main-body .mb-24 {
+    margin-block-end: 1.5rem !important;
+    border-bottom: 1px solid #fff;
+}
+.body-title {
+    color: #45BF55;
+    font-weight: 700;
+    font-size: 2.5rem;
+    padding: 1rem;
+}
+.dashboard-main-body .mb-24 ul {
+    list-style: none;
+    padding-top: 1rem;
+}
+.dashboard-main-body .mb-24 ul li a {
+    text-decoration: none;
+    color: #45BF55;
+    font-size: 1.5rem;
+}
+#myTab .nav-item {
+    margin-right: 0.2rem;
+}
+#myTab .nav-item .nav-link {
+    color: #fff;
+    background-color: #45BF55;
+    border: 1px solid #45BF55;
+    border-radius: 0.25rem;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.3s, color 0.3s;
+}
+#myTab .nav-item .nav-link.active {
+    background-color: #fff;
+    color: #45BF55;
+    border-color: #45BF55;
+}
+#myTabContent .tab-pane {
+    padding: 1.5rem;
+}
+#myTabContent .tab-pane .form-group label {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+}
+#myTabContent .tab-pane .form-group .d-flex label {
+    margin-right: 1rem;
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+}
+#myTabContent .tab-pane .form-group .d-flex .current-user-image {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 0.5rem;
+    border: 2px solid #ddd;
+    margin-left: 1rem;
+    object-fit: cover;
+}
+.form-control {
+    font-size: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.25rem;
+}
+#myTabContent .tab-pane .form-group button.btn-success {
+    font-size: 1rem;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.25rem;
+}
+#myTabContent .tab-pane .form-group .show-pass-word {
+    position: absolute;
+    top: 55%;
+    right: 1rem;
+    cursor: pointer;
+}
+#myTabContent .tab-pane .form-group .show-pass-word:hover{
+    color: #45BF55;
+}

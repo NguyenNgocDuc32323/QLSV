@@ -21,7 +21,7 @@
                                 <div class="col-md-4 gradient-custom text-center text-white custom-gradient-column">
                                     <img src="./assets/images/student_profile.jpg" alt="avatar" class="img-fluid mt-5 mb-4">
                                     <h5>Nguyễn Ngọc Đức</h5>
-                                    <a href="#" class="text-white">
+                                    <a href="edit-profile.php" class="text-white">
                                         <i class="far fa-edit mb-5"></i>
                                     </a>
                                 </div>
@@ -29,7 +29,7 @@
                                     <div class="card-body p-4">
                                         <div class="d-flex align-items-center infor-block">
                                             <h6>Thông Tin Học Sinh</h6>
-                                            <a href="#" class="ms-auto">
+                                            <a href="edit-profile.php" class="ms-auto">
                                                 <i class="far fa-edit"></i>
                                             </a>
                                         </div>
