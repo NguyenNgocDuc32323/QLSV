@@ -174,8 +174,8 @@ unset($_SESSION['errors']);
                         <div class="col-lg-6 col-md-12 bg-img">
                             <div class="information">
                                 <div class="btn-section">
-                                    <a href="register.php" class="active link-btn">Đăng Ký</a>
-                                    <a href="login.php" class="link-btn">Đăng Nhập</a>
+                                    <a href="login.php" class="active link-btn">Đăng Nhập</a>
+                                    <a href="index.php" class="link-btn">Trang Chủ</a>
                                 </div>
                                 <h1>ĐẠI HỌC SƯ PHẠM KỸ THUẬT VINH</h1>
                                 <p>Ký túc xá Trường Đại học Sư phạm Kỹ thuật Vinh cung cấp nơi ở tiện nghi và an toàn,
