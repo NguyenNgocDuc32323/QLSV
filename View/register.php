@@ -23,25 +23,43 @@
                             <h3>Đăng Ký Tài Khoản</h3>
                             <form method="POST" action="{{route('register-post')}}">
                                 <div class="form-group form-box">
+                                    <input type="text" name="student_code" class="form-control" placeholder="Mã Học Sinh" required>
+                                </div>
+                                <div class="form-group form-box">
                                     <input type="text" name="username" class="form-control" placeholder="Họ Và Tên" required>
                                 </div>
                                 <div class="form-group form-box">
                                     <input type="email" name="email" class="form-control" placeholder="Địa Chỉ Email" required>
                                 </div>
-                                <div class="form-group form-box position-relative">
+                                <div class="form-group form-box position-relative password-form">
                                     <input type="password" name="password" class="form-control" placeholder="Mật Khẩu" required>
-                                    <span class="position-absolute top-50 end-0 translate-middle-y me-3 cursor-pointer toggle-password" style="z-index: 10;">
+                                    <span class="position-absolute top-50 end-0 translate-middle-y cursor-pointer toggle-password" style="z-index: 10;">
                                         <i class="see-password fa fa-eye"></i>
                                     </span>
                                 </div>
-                                <div class="form-group form-box position-relative">
+                                <div class="form-group form-box position-relative password-form">
                                     <input type="password" name="confirm_password" class="form-control" placeholder="Xác Nhận Mật Khẩu" required>
-                                    <span class="position-absolute top-50 end-0 translate-middle-y me-3 cursor-pointer toggle-password" style="z-index: 10;">
+                                    <span class="position-absolute top-50 end-0 translate-middle-y cursor-pointer toggle-password" style="z-index: 10;">
                                         <i class="see-password fa fa-eye"></i>
                                     </span>
                                 </div>
                                 <div class="form-group form-box">
+                                    <input type="text" name="email" class="form-control" placeholder="Căn Cước Công Dân" required>
+                                </div>
+                                <div class="form-group form-box">
                                     <input type="text" name="phone" class="form-control" placeholder="Số Điện Thoại" required>
+                                </div>
+                                <div class="form-group form-box text-left">
+                                    <label for="gender" class="form-label">Ngày Sinh:</label>
+                                    <input type="datetime-local" name="birth" class="form-control" placeholder="Ngày Sinh" required>
+                                </div>
+                                <div class="form-group form-box text-left">
+                                    <label for="gender" class="form-label">Giới Tính:</label>
+                                    <select name="gender" class="form-control form-select" required>
+                                        <option class="form-control" value="Nam">Nam</option>
+                                        <option class="form-control" value="Nữ">Nữ</option>
+                                        <option class="form-control" value="Khác">Khác</option>
+                                    </select>
                                 </div>
                                 <div class="form-group form-box checkbox clearfix">
                                     <div class="form-check checkbox-theme">

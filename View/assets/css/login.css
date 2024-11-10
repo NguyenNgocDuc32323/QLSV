@@ -79,7 +79,7 @@
 .form-control {
     outline: none;
     width: 100%;
-    padding: 10px 25px;
+    padding: 0 25px;
     font-size: 16px;
     font-weight: 400;
     color: #3c4043;
@@ -338,5 +338,29 @@
     position: absolute;
     right: -25px;
     top: 39%;
+    transform: translateY(-50%);
+}
+.text-left{
+    text-align: left;
+}
+.form-label{
+    font-weight: 600;
+    padding: 10px;
+    display: block;
+    font-size: 18px;
+    color: #45BF55;
+}
+.form-select{
+    width: 502px;
+    height: 57px;
+    color: #45BF55;
+}
+.form-select option{
+    color: #45BF55;
+}
+.password-form .position-absolute{
+    position: absolute;
+    right: 0;
+    top: 50%;
     transform: translateY(-50%);
 }
