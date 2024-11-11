@@ -125,9 +125,13 @@ public function updatePassword($userId, $currentPassword, $newPassword) {
     $profileModel = new Profile($this->conn);
 
     if ($profileModel->updatePassword($userId, $currentPassword, $newPassword)) {
-        return ['status' => 'success', 'message' => 'Password updated successfully'];
+        // Trả về mã JavaScript để hiển thị thông báo thành công
+        echo "<script>alert('Password updated successfully'); window.location.href = 'profile.php';</script>";
+        exit();
     } else {
-        return ['status' => 'error', 'message' => 'Failed to update password. Current password may be incorrect or an error occurred.'];
+        // Trả về mã JavaScript để hiển thị thông báo lỗi
+        echo "<script>alert('Failed to update password. Current password may be incorrect or an error occurred.'); window.history.back();</script>";
+        exit();
     }
 }
 
