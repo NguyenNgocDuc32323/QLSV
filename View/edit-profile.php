@@ -58,7 +58,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $updateResult = $profileController->updateProfile($userData, $userId);
 
     if ($updateResult) {
-        header('Location: profile.php?status=success');
+        header('Location: profile.php');
         exit();
     } else {
         echo "Cập nhật thông tin thất bại!";
