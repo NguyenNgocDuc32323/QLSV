@@ -91,7 +91,7 @@ public function updatePassword($userId, $currentPassword, $newPassword) {
             $stmt->fetch();
         } else {
             // Handle case where no user is found
-            return false; // or handle the error appropriately
+            return false; 
         }
 
         $stmt->close();
@@ -99,13 +99,8 @@ public function updatePassword($userId, $currentPassword, $newPassword) {
         // Handle preparation failure
         return false;
     }
-
-    // Verify that $storedPassword has been assigned before using it
     if ($storedPassword !== null && sha1($currentPassword) === $storedPassword) {
-        // Hash the new password with sha1
         $newHashedPassword = sha1($newPassword);
-
-        // Update query to change the password
         $updateQuery = "UPDATE nguoidung SET mat_khau = ? WHERE id = ?";
         $updateStmt = $this->conn->prepare($updateQuery);
 
@@ -121,7 +116,7 @@ public function updatePassword($userId, $currentPassword, $newPassword) {
         }
     }
 
-    return false; // Current password does not match or an error occurred
+    return false;
 }
 
 
