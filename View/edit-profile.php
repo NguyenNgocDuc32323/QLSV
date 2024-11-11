@@ -122,6 +122,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     aria-labelledby="profile-tab">
                                     <form action="" method="POST" enctype="multipart/form-data" class="w-50 mx-auto">
                                         <div class="form-group mb-3">
+                                            <label for="name">Mã Sinh Viên</label>
+                                            <input type="text" class="form-control" id="name" name=""
+                                                value="<?= htmlspecialchars($user_data['ma_sinh_vien'] ?? '') ?>" readonly>
+                                        </div>
+                                        <div class="form-group mb-3">
                                             <label for="name">Họ và tên</label>
                                             <input type="text" class="form-control" id="name" name="fullName"
                                                 value="<?= htmlspecialchars($user_data['ho_ten'] ?? '') ?>">
