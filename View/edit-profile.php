@@ -28,8 +28,28 @@ if (isset($_SESSION['user_data'])) {
 
 // Xử lý form nếu có POST request
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // If form is to update profile
-    if (isset($_POST['fullName'])) {
+    if (isset($_POST['form_type']) && $_POST['form_type'] === 'change_password') {
+            // Lấy thông tin từ form
+            $currentPassword = $_POST['current-password'];
+            $newPassword = $_POST['new-password'];
+            $confirmPassword = $_POST['new-password_confirmation'];
+
+            // Kiểm tra mật khẩu mới và xác nhận mật khẩu
+            if ($newPassword === $confirmPassword) {
+                $profileController = new ProfileController($conn);
+                $updateResult = $profileController->updatePassword($userId, $currentPassword, $newPassword);
+                if ($updateResult['status'] === 'success') {
+                    header('Location: profile.php');
+                    exit();
+                } else {
+                    echo $updateResult['message'];
+                }
+            } else {
+                echo "Mật khẩu mới và xác nhận mật khẩu không khớp.";
+            }
+
+        }
+    elseif  (isset($_POST['fullName'])) {
         $fullName = $_POST['fullName'] ?? '';
         $email = $_POST['email'] ?? '';
         $phone = $_POST['phone'] ?? '';
