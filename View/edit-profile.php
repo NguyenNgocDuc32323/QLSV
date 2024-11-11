@@ -2,6 +2,8 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
+
+// Kiểm tra người dùng đã đăng nhập chưa
 if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
     header('Location: login.php');
     exit();
@@ -9,63 +11,60 @@ if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
 
 require_once '../config/database.php'; 
 require_once '../Controller/ProfileController.php';
+
 $database = new Database();
 $conn = $database->connect();
+
+// Lấy ID người dùng từ session
 $userId = $_SESSION['login']; 
 
+// Kiểm tra nếu thông tin người dùng đã có trong session (nếu cần dùng)
 if (isset($_SESSION['user_data'])) {
     $user_data = $_SESSION['user_data'];
 } else {
     echo "User data is missing from session!";
     exit();
 }
+
+// Xử lý form nếu có POST request
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $fullName = $_POST['fullName'];
-    $email = $_POST['email'];
-    $phone = $_POST['phone'];
-    $birthYear = $_POST['birthYear'];
-    $gender = $_POST['gender'];
-    $idNumber = $_POST['idNumber'];
-    $hometown = $_POST['hometown'];
-    $avatar = isset($_FILES['avatar']) ? $_FILES['avatar']['name'] : '';
-    if ($avatar) {
-        $targetDir = "./assets/images/";
-        $targetFile = $targetDir . basename($_FILES["avatar"]["name"]);
-        $check = getimagesize($_FILES["avatar"]["tmp_name"]);
-        if ($check === false) {
-            echo "File is not an image.";
+    // If form is to update profile
+    if (isset($_POST['fullName'])) {
+        $fullName = $_POST['fullName'] ?? '';
+        $email = $_POST['email'] ?? '';
+        $phone = $_POST['phone'] ?? '';
+        $birthYear = $_POST['birthYear'] ?? '';
+        $gender = $_POST['gender'] ?? '';
+        $idNumber = $_POST['idNumber'] ?? '';
+        $hometown = $_POST['hometown'] ?? '';
+        $avatar = '';
+
+        // Collect user data
+        $userData = [
+            'ho_ten' => $fullName,
+            'email' => $email,
+            'so_dien_thoai' => $phone,
+            'ngay_sinh' => $birthYear,
+            'gioi_tinh' => $gender,
+            'so_cmnd' => $idNumber,
+            'que_quan' => $hometown,
+        ];
+
+        // Create ProfileController instance
+        $profileController = new ProfileController($conn);
+
+        // Call the controller to update profile (pass $_FILES to handle file upload)
+        $updateResult = $profileController->updateProfile($userData, $_SESSION['login'], $_FILES);
+
+        if ($updateResult) {
+            header('Location: profile.php');
             exit();
+        } else {
+            echo "Cập nhật thông tin thất bại!";
         }
-        if ($_FILES["avatar"]["size"] > 2000000) {
-            echo "File is too large.";
-            exit();
-        }
-
-        move_uploaded_file($_FILES["avatar"]["tmp_name"], $targetFile);
-    }
-
-    $userData = [
-        'ho_ten' => $fullName,
-        'email' => $email,
-        'so_dien_thoai' => $phone,
-        'ngay_sinh' => $birthYear,
-        'gioi_tinh' => $gender,
-        'so_cmnd' => $idNumber,
-        'que_quan' => $hometown,
-        'avatar' => $avatar ? $avatar : '', 
-    ];
-    $profileController = new ProfileController($conn);
-    $updateResult = $profileController->updateProfile($userData, $userId);
-
-    if ($updateResult) {
-        header('Location: profile.php');
-        exit();
-    } else {
-        echo "Cập nhật thông tin thất bại!";
     }
 }
 ?>
-
 
 
 <!DOCTYPE html>
@@ -107,7 +106,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <ul class="nav" id="myTab" role="tablist">
                                 <li class="nav-item" role="presentation">
                                     <a class="nav-link active" id="profile-tab" data-bs-toggle="tab" href="#profile"
-                                        role="tab" aria-controls="profile" aria-selected="true">Thông tin cá nhân</a>
+                                        role="tab" aria-controls="profile" aria-selected="true">Thông tin cá
+                                        nhân</a>
                                 </li>
                                 <li class="nav-item" role="presentation">
                                     <a class="nav-link" id="password-tab" data-bs-toggle="tab" href="#password"
@@ -160,11 +160,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                     Khác</option>
                                             </select>
                                         </div>
-                                        <!-- <div class="form-group mb-3">
-                                            <label for="address">Địa chỉ</label>
-                                            <input type="text" class="form-control" id="address" name="address"
-                                                value="<?= htmlspecialchars($user_data['dia_chi'] ?? '') ?>">
-                                        </div> -->
                                         <div class="form-group mb-3">
                                             <label for="idNumber">Số CCCD</label>
                                             <input type="text" class="form-control" id="idNumber" name="idNumber"
@@ -181,11 +176,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                                 <label for="avatar">Ảnh đại diện hiện tại</label>
                                                 <!-- Thẻ img để hiển thị ảnh mới chọn -->
                                                 <?php if (!empty($user_data['avatar'])): ?>
-                                                <img src="./assets/images/<?php echo htmlspecialchars($user_data['avatar']); ?>"
+                                                <img src="./assets/images/avatar/<?php echo htmlspecialchars($user_data['avatar']); ?>"
                                                     alt="Avatar hiện tại" id="currentAvatar" class="current-user-image">
                                                 <?php else: ?>
                                                 <!-- If no avatar is available, use a default image -->
-                                                <img src="./assets/images/student_profile.jpg" alt="Avatar hiện tại"
+                                                <img src="./assets/images/avatar/logo.webp" alt="Avatar hiện tại"
                                                     id="currentAvatar" class="current-user-image">
                                                 <?php endif; ?>
                                             </div>
@@ -202,10 +197,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <!-- Tab Đổi mật khẩu -->
                                 <div class="tab-pane fade" id="password" role="tabpanel" aria-labelledby="password-tab">
                                     <form action="#" method="POST" class="w-50 mx-auto">
+                                        <input type="hidden" name="form_type" value="change_password">
                                         <div class="form-group mb-3 position-relative">
                                             <label for="current-password">Mật khẩu hiện tại</label>
                                             <input type="password" class="form-control" id="current-password"
-                                                name="current-password">
+                                                name="current-password" required>
                                             <span class="show-pass-word">
                                                 <i class="fa fa-eye"></i>
                                             </span>
@@ -213,7 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         <div class="form-group mb-3 position-relative">
                                             <label for="new-password">Mật khẩu mới</label>
                                             <input type="password" class="form-control" id="new-password"
-                                                name="new-password">
+                                                name="new-password" required>
                                             <span class="show-pass-word">
                                                 <i class="fa fa-eye"></i>
                                             </span>
@@ -221,7 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         <div class="form-group mb-3 position-relative">
                                             <label for="confirm-password">Xác nhận mật khẩu mới</label>
                                             <input type="password" class="form-control" id="confirm-password"
-                                                name="new-password_confirmation">
+                                                name="new-password_confirmation" required>
                                             <span class="show-pass-word">
                                                 <i class="fa fa-eye"></i>
                                             </span>
@@ -230,6 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                             <button type="submit" class="btn btn-success">Đổi mật khẩu</button>
                                         </div>
                                     </form>
+
                                 </div>
                             </div>
                         </div>

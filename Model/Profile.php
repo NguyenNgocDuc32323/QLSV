@@ -72,5 +72,60 @@ class Profile {
     }
 }
 
+public function updatePassword($userId, $currentPassword, $newPassword) {
+    // Initialize $storedPassword to avoid warnings
+    $storedPassword = null;
+
+    // Query to fetch the current password hash
+    $query = "SELECT mat_khau FROM nguoidung WHERE id = ?";
+    $stmt = $this->conn->prepare($query);
+
+    if ($stmt) {
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $stmt->store_result();
+
+        // Check if the result has a row
+        if ($stmt->num_rows > 0) {
+            $stmt->bind_result($storedPassword);
+            $stmt->fetch();
+        } else {
+            // Handle case where no user is found
+            return false; // or handle the error appropriately
+        }
+
+        $stmt->close();
+    } else {
+        // Handle preparation failure
+        return false;
+    }
+
+    // Verify that $storedPassword has been assigned before using it
+    if ($storedPassword !== null && sha1($currentPassword) === $storedPassword) {
+        // Hash the new password with sha1
+        $newHashedPassword = sha1($newPassword);
+
+        // Update query to change the password
+        $updateQuery = "UPDATE nguoidung SET mat_khau = ? WHERE id = ?";
+        $updateStmt = $this->conn->prepare($updateQuery);
+
+        if ($updateStmt) {
+            $updateStmt->bind_param("si", $newHashedPassword, $userId);
+
+            if ($updateStmt->execute()) {
+                $updateStmt->close();
+                return true; // Password updated successfully
+            }
+
+            $updateStmt->close();
+        }
+    }
+
+    return false; // Current password does not match or an error occurred
+}
+
+
+
+
 }
 ?>

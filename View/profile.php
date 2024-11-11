@@ -39,7 +39,7 @@ if ($result) {
                                 <div class="row g-0">
                                     <div class="col-md-4 gradient-custom text-center text-white custom-gradient-column">
                                         <?php if (!empty($user_data['avatar'])): ?>
-                                        <img src="./assets/images/<?php echo htmlspecialchars($user_data['avatar']); ?>"
+                                        <img src="./assets/images/avatar/<?php echo htmlspecialchars($user_data['avatar']); ?>"
                                             alt="avatar" class="img-fluid mt-5 mb-4">
                                         <?php else: ?>
                                         <img src="./assets/images/student_profile.jpg" alt="avatar"
