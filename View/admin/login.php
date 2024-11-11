@@ -1,9 +1,6 @@
 <?php
 session_start();
-if (isset($_SESSION['is_logged_in']) && $_SESSION['is_logged_in'] === true) {
-    header('Location: index.php');
-    exit();
-}
+
 
 require_once '../../config/database.php';
 require_once '../../Controller/admin/LoginController.php';

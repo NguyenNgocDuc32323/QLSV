@@ -2,9 +2,16 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
+
 require_once '../../config/database.php'; 
+
 if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
     header('Location: login.php');
+    exit();
+}
+
+if (isset($_SESSION['vai_tro']) && $_SESSION['vai_tro'] !== 'Quan Tri Vien') {
+     header('Location: login.php');
     exit();
 }
 ?>
@@ -75,7 +82,11 @@ if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
                 <div class="content">
                     <div id="content-product" class="content-tab">
                         <div class="p-4 main-content bg-success">
+                            <?php var_dump($_SESSION['is_logged_in']);
+                                var_dump($_SESSION['vai_tro']);
+                                var_dump($_SESSION); ?>
                             <div class="d-flex align-items-center justify-content-between manage-prd-title">
+
                                 <h1 class="text-white fw-bold p-3 fw-700">Quản Lý Sản Phẩm</h1>
                                 <button class="btn btn-success bg-white btn-add-prd">
                                     Thêm Sản Phẩm
