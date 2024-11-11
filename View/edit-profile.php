@@ -14,11 +14,8 @@ require_once '../Controller/ProfileController.php';
 
 $database = new Database();
 $conn = $database->connect();
-
-// Lấy ID người dùng từ session
 $userId = $_SESSION['login']; 
 
-// Kiểm tra nếu thông tin người dùng đã có trong session (nếu cần dùng)
 if (isset($_SESSION['user_data'])) {
     $user_data = $_SESSION['user_data'];
 } else {
@@ -26,15 +23,11 @@ if (isset($_SESSION['user_data'])) {
     exit();
 }
 
-// Xử lý form nếu có POST request
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_POST['form_type']) && $_POST['form_type'] === 'change_password') {
-            // Lấy thông tin từ form
             $currentPassword = $_POST['current-password'];
             $newPassword = $_POST['new-password'];
             $confirmPassword = $_POST['new-password_confirmation'];
-
-            // Kiểm tra mật khẩu mới và xác nhận mật khẩu
             if ($newPassword === $confirmPassword) {
                 $profileController = new ProfileController($conn);
                 $updateResult = $profileController->updatePassword($userId, $currentPassword, $newPassword);
@@ -49,44 +42,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
 
         }
-    elseif  (isset($_POST['fullName'])) {
-        $fullName = $_POST['fullName'] ?? '';
-        $email = $_POST['email'] ?? '';
-        $phone = $_POST['phone'] ?? '';
-        $birthYear = $_POST['birthYear'] ?? '';
-        $gender = $_POST['gender'] ?? '';
-        $idNumber = $_POST['idNumber'] ?? '';
-        $hometown = $_POST['hometown'] ?? '';
-        $avatar = '';
-
-        // Collect user data
-        $userData = [
-            'ho_ten' => $fullName,
-            'email' => $email,
-            'so_dien_thoai' => $phone,
-            'ngay_sinh' => $birthYear,
-            'gioi_tinh' => $gender,
-            'so_cmnd' => $idNumber,
-            'que_quan' => $hometown,
-        ];
-
-        // Create ProfileController instance
-        $profileController = new ProfileController($conn);
-
-        // Call the controller to update profile (pass $_FILES to handle file upload)
-        $updateResult = $profileController->updateProfile($userData, $_SESSION['login'], $_FILES);
-
-        if ($updateResult) {
-            header('Location: profile.php');
-            exit();
-        } else {
-            echo "Cập nhật thông tin thất bại!";
-        }
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_profile'])) {
+    $fullName = $_POST['fullName'] ?? null;
+    $email = $_POST['email'] ?? null;
+    $phone = $_POST['phone'] ?? null;
+    $birthYear = $_POST['birthYear'] ?? null;
+    $gender = $_POST['gender'] ?? null;
+    $idNumber = $_POST['idNumber'] ?? null;
+    $hometown = $_POST['hometown'] ?? null;
+    if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+        $fileName = $_FILES['avatar']['name'];
+    } else {
+        $fileName = null;
+    }
+    $profileController = new ProfileController($conn);
+    $checkUpdate = $profileController->updateProfile($userId, $fullName, $email, $phone, $birthYear, $gender, $idNumber, $hometown, $fileName);
+    if ($checkUpdate) {
+        header('Location: profile.php');
+        exit();
+    }
+    else{
+        echo "Cập nhật thông tin thất bại!";
     }
 }
 ?>
-
-
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -140,7 +120,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <!-- Tab Thông tin cá nhân -->
                                 <div class="tab-pane fade show active" id="profile" role="tabpanel"
                                     aria-labelledby="profile-tab">
-                                    <form action="" method="POST" enctype="multipart/form-data" class="w-50 mx-auto">
+                                    <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST" enctype="multipart/form-data" class="w-50 mx-auto">
+                                        <input type="hidden" name="change_profile" value="change_profile">
                                         <div class="form-group mb-3">
                                             <label for="name">Mã Sinh Viên</label>
                                             <input type="text" class="form-control" id="name" name=""

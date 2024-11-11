@@ -32,45 +32,71 @@ class Profile {
     }
 
     public function updateProfileData($userId, $fullName, $email, $phone, $birthYear, $gender, $idNumber, $hometown, $avatar) {
-    if ($gender === 'male') {
-        $gender = 'Nam';
-    } elseif ($gender === 'female') {
-        $gender = 'Nu';
-    } elseif ($gender === 'other') {
-        $gender = 'Khac';
-    } else {
-
-        $gender = 'Khac';
-    }
-
-    $query = "
-        UPDATE nguoidung AS nd
-        JOIN hocsinh AS hs ON nd.id = hs.id_nguoi_dung
-        SET 
-            nd.ho_ten = ?, 
-            nd.email = ?, 
-            nd.so_dien_thoai = ?, 
-            nd.ngay_sinh = ?, 
-            nd.gioi_tinh = ?, 
-            nd.avatar = ?, 
-            hs.so_cmnd = ?, 
-            hs.que_quan = ? 
-        WHERE 
-            nd.id = ?
-    ";
-
-    if ($stmt = $this->conn->prepare($query)) {
-        $stmt->bind_param("ssssssssi", $fullName, $email, $phone, $birthYear, $gender, $avatar, $idNumber, $hometown, $userId);
-
-        if ($stmt->execute()) {
-            return true;
+        // Xử lý giới tính
+        if ($gender === 'male') {
+            $gender = 'Nam';
+        } elseif ($gender === 'female') {
+            $gender = 'Nữ';  // Chỉnh lại từ 'Nu' thành 'Nữ' để chuẩn hóa tiếng Việt
+        } elseif ($gender === 'other') {
+            $gender = 'Khác';
         } else {
-            return false;
+            $gender = 'Khác';
         }
-    } else {
-        return false;
+    
+        // Kiểm tra nếu có ảnh đại diện mới
+        if ($avatar) {
+            $query = "
+                UPDATE nguoidung AS nd
+                JOIN hocsinh AS hs ON nd.id = hs.id_nguoi_dung
+                SET 
+                    nd.ho_ten = ?, 
+                    nd.email = ?, 
+                    nd.so_dien_thoai = ?, 
+                    nd.ngay_sinh = ?, 
+                    nd.gioi_tinh = ?, 
+                    nd.avatar = ?, 
+                    hs.so_cmnd = ?, 
+                    hs.que_quan = ? 
+                WHERE 
+                    nd.id = ?
+            ";
+        } else {
+            $query = "
+                UPDATE nguoidung AS nd
+                JOIN hocsinh AS hs ON nd.id = hs.id_nguoi_dung
+                SET 
+                    nd.ho_ten = ?, 
+                    nd.email = ?, 
+                    nd.so_dien_thoai = ?, 
+                    nd.ngay_sinh = ?, 
+                    nd.gioi_tinh = ?, 
+                    hs.so_cmnd = ?, 
+                    hs.que_quan = ? 
+                WHERE 
+                    nd.id = ?
+            ";
+        }
+    
+        // Chuẩn bị và thực thi câu lệnh SQL
+        if ($stmt = $this->conn->prepare($query)) {
+            // Nếu có ảnh, gắn tham số cho trường avatar
+            if ($avatar) {
+                $stmt->bind_param("ssssssssi", $fullName, $email, $phone, $birthYear, $gender, $avatar, $idNumber, $hometown, $userId);
+            } else {
+                $stmt->bind_param("sssssssi", $fullName, $email, $phone, $birthYear, $gender, $idNumber, $hometown, $userId);
+            }
+    
+            // Thực thi câu lệnh SQL và kiểm tra kết quả
+            if ($stmt->execute()) {
+                return true;  // Thành công
+            } else {
+                return false; // Lỗi khi thực thi
+            }
+        } else {
+            return false;  // Lỗi khi chuẩn bị câu lệnh
+        }
     }
-}
+    
 
 public function updatePassword($userId, $currentPassword, $newPassword) {
     // Initialize $storedPassword to avoid warnings

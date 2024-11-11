@@ -4,16 +4,19 @@ if (session_status() == PHP_SESSION_NONE) {
 }
 
 require_once '../config/database.php';
-require_once '../Model/Profile.php';   
+require_once '../Model/Profile.php';
 
-class ProfileController {
+class ProfileController
+{
     private $conn;
 
-    public function __construct($conn) {
+    public function __construct($conn)
+    {
         $this->conn = $conn;
     }
 
-    public function showProfile() {
+    public function showProfile()
+    {
         if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true || !isset($_SESSION['login'])) {
             header('Location: login.php');
             exit();
@@ -29,112 +32,65 @@ class ProfileController {
         return $profile_data;
     }
 
+    public function updatePassword($userId, $currentPassword, $newPassword)
+    {
+        $profileModel = new Profile($this->conn);
 
-    public function updateProfile($data, $files) {
+        if ($profileModel->updatePassword($userId, $currentPassword, $newPassword)) {
+            // Trả về mã JavaScript để hiển thị thông báo thành công
+            echo "<script>alert('Password updated successfully'); window.location.href = 'profile.php';</script>";
+            exit();
+        } else {
+            // Trả về mã JavaScript để hiển thị thông báo lỗi
+            echo "<script>alert('Failed to update password. Current password may be incorrect or an error occurred.'); window.history.back();</script>";
+            exit();
+        }
+    }
+    public function updateProfile($userId, $fullName, $email, $phone, $birthYear, $gender, $idNumber, $hometown, $avatar) {
+
         if (!isset($_SESSION['login'])) {
             header('Location: login.php');
             exit();
         }
-
-        // Get the user ID from the session
+    
         $id_nguoidung = $_SESSION['login'];
-
-        // Collect data from form
-        $ho_ten = $data['ho_ten'];
-        $ngay_sinh = $data['ngay_sinh'];
-        $so_cmnd = $data['so_cmnd'];
-        $gioi_tinh = $data['gioi_tinh'];
-        $email = $data['email'];
-        $so_dien_thoai = $data['so_dien_thoai'];
-        $que_quan = $data['que_quan'];
-
-        // Call the helper function to handle file upload and get the avatar path
-        $avatarPath = $this->handleAvatarUpload($files);
-
-        // Update the profile data in the database
+    
+        // Xử lý upload ảnh nếu có
+        $avatarPath = null;
+        $avatarName = null;
+        if (isset($_FILES['avatar']) && $_FILES['avatar']['error'] === UPLOAD_ERR_OK) {
+            $avatarName = basename($_FILES['avatar']['name']); // Lấy tên file gốc
+            $avatarPath = "assets/images/avatar/" . $avatarName; // Đường dẫn lưu file
+    
+            // Kiểm tra xem file có phải là hình ảnh hợp lệ không
+            $fileExtension = pathinfo($avatarName, PATHINFO_EXTENSION);
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+            if (!in_array(strtolower($fileExtension), $allowedExtensions)) {
+                echo "Định dạng file không hợp lệ. Chỉ chấp nhận JPG, JPEG, PNG, GIF.";
+                return;
+            }
+    
+            // Di chuyển file đến thư mục đích
+            if (!move_uploaded_file($_FILES['avatar']['tmp_name'], $avatarPath)) {
+                echo "Lỗi khi tải lên ảnh đại diện.";
+                return;
+            }
+        }
+    
+        // Khởi tạo model và cập nhật dữ liệu vào cơ sở dữ liệu
         $profileModel = new Profile($this->conn);
         return $profileModel->updateProfileData(
             $id_nguoidung, 
-            $ho_ten, 
+            $fullName, 
             $email, 
-            $so_dien_thoai, 
-            $ngay_sinh, 
-            $gioi_tinh, 
-            $so_cmnd, 
-            $que_quan, 
-            $avatarPath // Pass the avatar path (name of the file)
+            $phone, 
+            $birthYear, 
+            $gender, 
+            $idNumber, 
+            $hometown, 
+            $avatarPath ? $avatarName : null // Truyền tên file nếu có, nếu không thì null
         );
     }
-
-    // Helper method to handle avatar file upload
-    private function handleAvatarUpload($files) {
-    // Default avatar path (if no file is uploaded)
-    $avatarPath = 'default-avatar1.png';
-
-    // Debugging: Check if a file is uploaded
-    if (isset($files['avatar']) && $files['avatar']['error'] == 0) {
-        // Debugging: Show file info
-        echo "File uploaded: " . $files["avatar"]["name"] . "<br>";
-        echo "Temp file path: " . $files["avatar"]["tmp_name"] . "<br>";
-        echo "File size: " . $files["avatar"]["size"] . "<br>";
-
-        // Set target directory and file path
-        $targetDir = "./assets/images/avatar/";
-        $targetFile = $targetDir . basename($files["avatar"]["name"]);
-
-        // Validate if the uploaded file is an image
-        $check = getimagesize($files["avatar"]["tmp_name"]);
-        if ($check === false) {
-            echo "File không phải là hình ảnh.<br>";
-            exit();
-        }
-
-        // Validate file size (max 2MB)
-        if ($files["avatar"]["size"] > 2000000) {
-            echo "File quá lớn. Vui lòng tải lên một file nhỏ hơn 2MB.<br>";
-            exit();
-        }
-
-        // Ensure the target directory exists and is writable
-        if (!is_writable($targetDir)) {
-            echo "Thư mục đích không thể ghi vào.<br>";
-            exit();
-        }
-
-        // Move the uploaded file to the target directory
-        if (move_uploaded_file($files["avatar"]["tmp_name"], $targetFile)) {
-            // Set the avatar path to the file name
-            $avatarPath = basename($files["avatar"]["name"]);
-            echo "Avatar uploaded successfully: " . $avatarPath . "<br>";
-        } else {
-            echo "Có lỗi khi tải ảnh lên.<br>";
-            exit();
-        }
-    } else {
-        // Debugging: Show if no file is uploaded
-        echo "No file uploaded, using default avatar.<br>";
-    }
-
-    return $avatarPath;
+    
+    
 }
-
-
-
-
-public function updatePassword($userId, $currentPassword, $newPassword) {
-    $profileModel = new Profile($this->conn);
-
-    if ($profileModel->updatePassword($userId, $currentPassword, $newPassword)) {
-        // Trả về mã JavaScript để hiển thị thông báo thành công
-        echo "<script>alert('Password updated successfully'); window.location.href = 'profile.php';</script>";
-        exit();
-    } else {
-        // Trả về mã JavaScript để hiển thị thông báo lỗi
-        echo "<script>alert('Failed to update password. Current password may be incorrect or an error occurred.'); window.history.back();</script>";
-        exit();
-    }
-}
-
-}
-
-?>
