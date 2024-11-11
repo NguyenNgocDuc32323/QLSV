@@ -8,7 +8,7 @@ $database = new Database();
 $conn = $database->connect();
 $profileController = new ProfileController($conn);
 $result = $profileController->showProfile(); 
-// var_dump($result);
+var_dump($result);
 
 if ($result) {
      $user_data = $_SESSION['user_data'] = $result;
@@ -80,8 +80,12 @@ if ($result) {
                                                 <div class="col-6 mb-3">
                                                     <h6>Căn Cước Công Dân</h6>
                                                     <p class="text-muted">
-                                                        <?php echo htmlspecialchars($user_data['so_cmnd']); ?></p>
+                                                        <?php 
+                                                        echo !empty($user_data['so_cmnd']) ? htmlspecialchars($user_data['so_cmnd']) : '';
+                                                        ?>
+                                                    </p>
                                                 </div>
+
                                                 <div class="col-6 mb-3">
                                                     <h6>Giới Tính</h6>
                                                     <p class="text-muted">
@@ -100,8 +104,12 @@ if ($result) {
                                                 <div class="col-6 mb-3">
                                                     <h6>Quê Quán</h6>
                                                     <p class="text-muted">
-                                                        <?php echo htmlspecialchars($user_data['que_quan']); ?></p>
+                                                        <?php 
+                                                         echo !empty($user_data['que_quan']) ? htmlspecialchars($user_data['que_quan']) : '';
+                                                        ?>
+                                                    </p>
                                                 </div>
+
                                             </div>
                                         </div>
                                     </div>

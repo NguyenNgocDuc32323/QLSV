@@ -65,19 +65,20 @@ class RegisterController {
             }
 
             // If there are no errors, proceed with registration
-            if (empty($errors)) {
+           if (empty($errors)) {
                 // Create User model
                 $userModel = new User($conn);
 
                 // Check if email already exists in the database
-                if ($userModel->checkEmailExists($email)) {
+                if ($userModel->checkEmailExists(email: $email)) {
                     $errors['email'] = "Email đã tồn tại.";
-                } else {
-                    // Hash password for security
-                    $hashed_password = password_hash($password, PASSWORD_BCRYPT);  // Use bcrypt for password hashing
-
-                    // Register the new user by calling the registerUser method in the model
-                    if ($userModel->registerUser($username, $email, $hashed_password, $phone, $gender, $birth)) {
+                } 
+                // Check if phone number already exists in the database
+                elseif ($userModel->checkPhoneExists($phone)) {
+                    $errors['phone'] = "Số điện thoại đã tồn tại.";
+                } 
+                else {
+                    if ($userModel->registerUser($username, $email, $password, $phone, $gender, $birth)) {
                         $_SESSION['success'] = "Đăng ký thành công! Vui lòng đăng nhập.";
                         header("Location: login.php");
                         exit();
@@ -86,6 +87,7 @@ class RegisterController {
                     }
                 }
             }
+
 
             // If there are errors, pass them to the view
             $_SESSION['errors'] = $errors;
