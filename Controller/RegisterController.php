@@ -38,7 +38,7 @@ class RegisterController {
             if (empty($password)) {
                 $errors['password'] = "Mật khẩu không được để trống.";
             } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/", $password)) {
-                $errors['password'] = "Mật khẩu phải chứa ít nhất một chữ cái viết hoa, một chữ cái viết thường, một số, một ký tự đặc biệt và có ít nhất 8 ký tự.";
+                $errors['password'] = "Mật khẩu không đúng định dạng.";
             }
 
             if ($password !== $confirm_password) {

@@ -372,4 +372,10 @@
 
 .text-danger {
     color: red;
+    padding-top: 18px;
+    text-align: left;
+    font-size: 14px;
+}
+.error-password{
+    top: 30% !important;
 }
