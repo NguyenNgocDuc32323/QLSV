@@ -8,7 +8,7 @@ $database = new Database();
 $conn = $database->connect();
 $profileController = new ProfileController($conn);
 $result = $profileController->showProfile(); 
-var_dump($result);
+
 
 if ($result) {
      $user_data = $_SESSION['user_data'] = $result;
