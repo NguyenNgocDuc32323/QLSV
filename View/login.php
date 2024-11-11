@@ -19,6 +19,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 $email = isset($_COOKIE['email']) ? $_COOKIE['email'] : '';
 $password = isset($_COOKIE['mat_khau']) ? $_COOKIE['mat_khau'] : '';
 $rememberChecked = (isset($_COOKIE['email']) && isset($_COOKIE['mat_khau'])) ? 'checked' : '';
+if (isset($_SESSION['login_failure']) && $_SESSION['login_failure']) {
+    $login_failure = $_SESSION['login_failure'];
+    echo "<script class='text-success'>alert('{$login_failure}');</script>";
+    unset($_SESSION['login_failure']);
+}
 ?>
 
 <!DOCTYPE html>
