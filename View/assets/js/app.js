@@ -33,5 +33,24 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 });
+// Lấy phần tử img và input file
+const avatarInput = document.getElementById('avatar');
+const currentAvatar = document.getElementById('currentAvatar');
 
-    
+// Lắng nghe sự kiện change của input file
+avatarInput.addEventListener('change', function (event) {
+    const file = event.target.files[0]; // Lấy file ảnh được chọn
+
+    // Kiểm tra nếu có file được chọn
+    if (file) {
+        // Tạo URL tạm thời cho ảnh
+        const imageUrl = URL.createObjectURL(file);
+
+        // Cập nhật src của ảnh
+        currentAvatar.src = imageUrl;
+    } else {
+        // Nếu không có ảnh nào được chọn, giữ nguyên ảnh hiện tại
+        avatarInput.value = ""; // Đặt lại input file để không xóa tên file hiện tại
+    }
+});
+

@@ -55,12 +55,12 @@ class LoginController {
                         setcookie('mat_khau', '', time() - 3600, "/");
                     }
 
-                    $_SESSION['login_success'] = "Đgit ăng nhập thành công"; // Thêm biến session cho đăng nhập thành công
+                    $_SESSION['login_success'] = "Đăng nhập thành công"; 
                     
                     header('Location: index.php');
                     exit();
                 } else {
-                    $_SESSION['login_failure'] = 'Thông tin đăng nhập không đúng.'; // Lưu thông báo lỗi
+                    $_SESSION['login_failure'] = 'Thông tin đăng nhập không đúng.';
                     header('Location: login.php');
                     exit();
                 }

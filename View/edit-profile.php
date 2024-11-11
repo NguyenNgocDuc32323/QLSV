@@ -1,16 +1,73 @@
 <?php
-session_start();
-
-// Check if the user is not logged in
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
 if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
-    // Redirect to the login page if not logged in
     header('Location: login.php');
     exit();
 }
 
-require_once '../config/database.php';
-// require_once '../Controller/LoginController.php'; // Uncomment if you need to include the LoginController
+require_once '../config/database.php'; 
+require_once '../Controller/ProfileController.php';
+$database = new Database();
+$conn = $database->connect();
+$userId = $_SESSION['login']; 
+
+if (isset($_SESSION['user_data'])) {
+    $user_data = $_SESSION['user_data'];
+} else {
+    echo "User data is missing from session!";
+    exit();
+}
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $fullName = $_POST['fullName'];
+    $email = $_POST['email'];
+    $phone = $_POST['phone'];
+    $birthYear = $_POST['birthYear'];
+    $gender = $_POST['gender'];
+    $idNumber = $_POST['idNumber'];
+    $hometown = $_POST['hometown'];
+    $avatar = isset($_FILES['avatar']) ? $_FILES['avatar']['name'] : '';
+    if ($avatar) {
+        $targetDir = "./assets/images/";
+        $targetFile = $targetDir . basename($_FILES["avatar"]["name"]);
+        $check = getimagesize($_FILES["avatar"]["tmp_name"]);
+        if ($check === false) {
+            echo "File is not an image.";
+            exit();
+        }
+        if ($_FILES["avatar"]["size"] > 2000000) {
+            echo "File is too large.";
+            exit();
+        }
+
+        move_uploaded_file($_FILES["avatar"]["tmp_name"], $targetFile);
+    }
+
+    $userData = [
+        'ho_ten' => $fullName,
+        'email' => $email,
+        'so_dien_thoai' => $phone,
+        'ngay_sinh' => $birthYear,
+        'gioi_tinh' => $gender,
+        'so_cmnd' => $idNumber,
+        'que_quan' => $hometown,
+        'avatar' => $avatar ? $avatar : '', 
+    ];
+    $profileController = new ProfileController($conn);
+    $updateResult = $profileController->updateProfile($userData, $userId);
+
+    if ($updateResult) {
+        header('Location: profile.php?status=success');
+        exit();
+    } else {
+        echo "Cập nhật thông tin thất bại!";
+    }
+}
 ?>
+
+
+
 <!DOCTYPE html>
 <html lang="vi">
 
@@ -63,31 +120,73 @@ require_once '../config/database.php';
                                 <!-- Tab Thông tin cá nhân -->
                                 <div class="tab-pane fade show active" id="profile" role="tabpanel"
                                     aria-labelledby="profile-tab">
-                                    <form action="#" method="POST" enctype="multipart/form-data" class="w-50 mx-auto">
+                                    <form action="" method="POST" enctype="multipart/form-data" class="w-50 mx-auto">
                                         <div class="form-group mb-3">
                                             <label for="name">Họ và tên</label>
-                                            <input type="text" class="form-control" id="name" name="name" value="">
+                                            <input type="text" class="form-control" id="name" name="fullName"
+                                                value="<?= htmlspecialchars($user_data['ho_ten'] ?? '') ?>">
                                         </div>
                                         <div class="form-group mb-3">
                                             <label for="email">Email</label>
-                                            <input type="email" class="form-control" id="email" name="email" value="">
+                                            <input type="email" class="form-control" id="email" name="email"
+                                                value="<?= htmlspecialchars($user_data['email'] ?? '') ?>">
                                         </div>
                                         <div class="form-group mb-3">
                                             <label for="phone">Số điện thoại</label>
-                                            <input type="text" class="form-control" id="phone" name="phone" value="">
+                                            <input type="text" class="form-control" id="phone" name="phone"
+                                                value="<?= htmlspecialchars($user_data['so_dien_thoai'] ?? '') ?>">
                                         </div>
                                         <div class="form-group mb-3">
+                                            <label for="birthYear">Năm sinh</label>
+                                            <input type="date" class="form-control" id="birthYear" name="birthYear"
+                                                value="<?= htmlspecialchars($user_data['ngay_sinh'] ?? '') ?>">
+                                        </div>
+                                        <div class="form-group mb-3">
+                                            <label for="gender">Giới tính</label>
+                                            <select name="gender" class="form-control form-select" required>
+                                                <option value="male"
+                                                    <?= isset($user_data['gioi_tinh']) && $user_data['gioi_tinh'] == 'Nam' ? 'selected' : '' ?>>
+                                                    Nam</option>
+                                                <option value="female"
+                                                    <?= isset($user_data['gioi_tinh']) && $user_data['gioi_tinh'] == 'Nữ' ? 'selected' : '' ?>>
+                                                    Nữ</option>
+                                                <option value="other"
+                                                    <?= isset($user_data['gioi_tinh']) && $user_data['gioi_tinh'] == 'Khác' ? 'selected' : '' ?>>
+                                                    Khác</option>
+                                            </select>
+                                        </div>
+                                        <!-- <div class="form-group mb-3">
                                             <label for="address">Địa chỉ</label>
                                             <input type="text" class="form-control" id="address" name="address"
-                                                value="">
+                                                value="<?= htmlspecialchars($user_data['dia_chi'] ?? '') ?>">
+                                        </div> -->
+                                        <div class="form-group mb-3">
+                                            <label for="idNumber">Số CCCD</label>
+                                            <input type="text" class="form-control" id="idNumber" name="idNumber"
+                                                value="<?= htmlspecialchars($user_data['so_cmnd'] ?? '') ?>">
                                         </div>
+                                        <div class="form-group mb-3">
+                                            <label for="hometown">Quê quán</label>
+                                            <input type="text" class="form-control" id="hometown" name="hometown"
+                                                value="<?= htmlspecialchars($user_data['que_quan'] ?? '') ?>">
+                                        </div>
+
                                         <div class="form-group mb-3">
                                             <div class="d-flex">
                                                 <label for="avatar">Ảnh đại diện hiện tại</label>
-                                                <img src="./assets/images/student_profile.jpg" alt=""
-                                                    class="current-user-image">
+                                                <!-- Thẻ img để hiển thị ảnh mới chọn -->
+                                                <?php if (!empty($user_data['avatar'])): ?>
+                                                <img src="./assets/images/<?php echo htmlspecialchars($user_data['avatar']); ?>"
+                                                    alt="Avatar hiện tại" id="currentAvatar" class="current-user-image">
+                                                <?php else: ?>
+                                                <!-- If no avatar is available, use a default image -->
+                                                <img src="./assets/images/student_profile.jpg" alt="Avatar hiện tại"
+                                                    id="currentAvatar" class="current-user-image">
+                                                <?php endif; ?>
                                             </div>
-                                            <input type="file" class="form-control mt-3" id="avatar" name="avatar">
+                                            <!-- Input để chọn file ảnh -->
+                                            <input type="file" class="form-control mt-3" id="avatar" name="avatar"
+                                                accept="image/*">
                                         </div>
                                         <div class="form-group mb-3 mt-4">
                                             <button type="submit" class="btn btn-success">Cập nhật thông tin cá
@@ -146,6 +245,7 @@ require_once '../config/database.php';
             integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF" crossorigin="anonymous">
         </script>
         <script src="./assets/js/app.js"></script>
+
     </body>
 
 </html>
