@@ -41,16 +41,15 @@ class User {
 public function registerUser($username, $email, $password, $phone, $gender, $birth) {
     // Hash the password using SHA-1
     $hashed_password = sha1($password);
-
+    $avatar = 'student_avatar.png';
     // Start a transaction to ensure both inserts succeed or fail together
     $this->conn->begin_transaction();
 
     try {
-        // Insert the user into the nguoidung table
-        $query = "INSERT INTO nguoidung (ho_ten, email, mat_khau, so_dien_thoai, gioi_tinh, ngay_sinh) 
-                  VALUES (?, ?, ?, ?, ?, ?)";
+        $query = "INSERT INTO nguoidung (ho_ten, email, mat_khau, so_dien_thoai, gioi_tinh, ngay_sinh,avatar) 
+                  VALUES (?, ?, ?, ?, ?, ?,?)";
         $stmt = $this->conn->prepare($query);
-        $stmt->bind_param("ssssss", $username, $email, $hashed_password, $phone, $gender, $birth);
+        $stmt->bind_param("sssssss", $username, $email, $hashed_password, $phone, $gender, $birth,$avatar);
         $stmt->execute();
 
         // Get the last inserted ID
