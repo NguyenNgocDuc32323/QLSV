@@ -19,6 +19,34 @@ class User {
         $stmt->execute();
         return $stmt->get_result();
     }
+//     public function getProfileData() {
+//     $query = "
+//         SELECT 
+//             nguoidung.ho_ten, nguoidung.email, nguoidung.so_dien_thoai, nguoidung.ngay_sinh, nguoidung.gioi_tinh, nguoidung.avatar,
+//             hocsinh.ma_sinh_vien, hocsinh.so_cmnd, hocsinh.que_quan
+//         FROM 
+//             nguoidung
+//         LEFT JOIN 
+//             hocsinh ON nguoidung.id = hocsinh.id_nguoi_dung
+//              WHERE 
+//         nguoidung.vai_tro = 'Hoc Sinh'
+//     ";
+
+//     if ($stmt = $this->conn->prepare($query)) {
+//         $stmt->execute();
+//         $result = $stmt->get_result();
+        
+//         $data = [];
+//         while ($row = $result->fetch_assoc()) {
+//             $data[] = $row; // Collect each row as an associative array
+//         }
+
+//         return !empty($data) ? $data : false; // Return the array if there are rows, else false
+//     } else {
+//         return false;
+//     }
+// }
+
 
 }
 ?>

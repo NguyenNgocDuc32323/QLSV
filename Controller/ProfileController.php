@@ -34,7 +34,14 @@ class ProfileController
 
     public function updatePassword($userId, $currentPassword, $newPassword)
     {
+        
         $profileModel = new Profile($this->conn);
+        if (!$profileModel->checkCurrentPassword($userId, $currentPassword)) {
+        // Nếu mật khẩu hiện tại không đúng, hiển thị thông báo lỗi
+        echo "<script>alert('Mật khẩu hiện tại không chính xác.'); window.history.back();</script>";
+        exit();
+    }
+
 
         if ($profileModel->updatePassword($userId, $currentPassword, $newPassword)) {
             // Trả về mã JavaScript để hiển thị thông báo thành công

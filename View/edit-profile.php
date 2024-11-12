@@ -28,6 +28,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $currentPassword = $_POST['current-password'];
             $newPassword = $_POST['new-password'];
             $confirmPassword = $_POST['new-password_confirmation'];
+            // Initialize an array to hold error messages
+            $errors = [];
+
+            // Validate new password
+            if (empty($newPassword)) {
+                $errors['newPassword'] = "Mật khẩu không được để trống.";
+            } elseif (!preg_match("/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/", $newPassword)) {
+                $errors['newPassword'] = "Mật khẩu không đúng định dạng.";
+            }
+
+            // Check if new password and confirm password match
+            if ($newPassword !== $confirmPassword) {
+                $errors['confirmPassword'] = "Mật khẩu mới và xác nhận mật khẩu không khớp.";
+            }
+
+            // If there are validation errors, return them
+            if (!empty($errors)) {
+                return ['status' => 'error', 'errors' => $errors];
+            }
             if ($newPassword === $confirmPassword) {
                 $profileController = new ProfileController($conn);
                 $updateResult = $profileController->updatePassword($userId, $currentPassword, $newPassword);
@@ -120,12 +139,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_profile'])) {
                                 <!-- Tab Thông tin cá nhân -->
                                 <div class="tab-pane fade show active" id="profile" role="tabpanel"
                                     aria-labelledby="profile-tab">
-                                    <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST" enctype="multipart/form-data" class="w-50 mx-auto">
+                                    <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST"
+                                        enctype="multipart/form-data" class="w-50 mx-auto">
                                         <input type="hidden" name="change_profile" value="change_profile">
                                         <div class="form-group mb-3">
                                             <label for="name">Mã Sinh Viên</label>
                                             <input type="text" class="form-control" id="name" name=""
-                                                value="<?= htmlspecialchars($user_data['ma_sinh_vien'] ?? '') ?>" readonly>
+                                                value="<?= htmlspecialchars($user_data['ma_sinh_vien'] ?? '') ?>"
+                                                readonly>
                                         </div>
                                         <div class="form-group mb-3">
                                             <label for="name">Họ và tên</label>
@@ -197,7 +218,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_profile'])) {
                                 </div>
                                 <!-- Tab Đổi mật khẩu -->
                                 <div class="tab-pane fade" id="password" role="tabpanel" aria-labelledby="password-tab">
-                                    <form action="#" method="POST" class="w-50 mx-auto">
+                                    <form action="" method="POST" class="w-50 mx-auto">
                                         <input type="hidden" name="form_type" value="change_password">
                                         <div class="form-group mb-3 position-relative">
                                             <label for="current-password">Mật khẩu hiện tại</label>

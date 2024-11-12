@@ -3,7 +3,8 @@ if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
-require_once '../../config/database.php'; 
+require_once '../../config/database.php';
+require_once '../../Controller/admin/DashboardController.php' ;
 
 if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
     header('Location: login.php');
@@ -14,6 +15,13 @@ if (isset($_SESSION['vai_tro']) && $_SESSION['vai_tro'] !== 'Quan Tri Vien') {
      header('Location: login.php');
     exit();
 }
+
+$database = new Database();
+$conn = $database->connect();
+$dashboardController = new DashboardController($conn);
+$result = $dashboardController->showProfile();
+$room = $dashboardController->showRoom();
+$contract = $dashboardController->showContract();
 ?>
 
 <!DOCTYPE html>
@@ -28,6 +36,7 @@ if (isset($_SESSION['vai_tro']) && $_SESSION['vai_tro'] !== 'Quan Tri Vien') {
             integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg=="
             crossorigin="anonymous" referrerpolicy="no-referrer" />
         <link rel="stylesheet" href="../assets/css/admin-dashboard.css" />
+
     </head>
 
     <body>
@@ -82,9 +91,8 @@ if (isset($_SESSION['vai_tro']) && $_SESSION['vai_tro'] !== 'Quan Tri Vien') {
                 <div class="content">
                     <div id="content-product" class="content-tab">
                         <div class="p-4 main-content bg-success">
-                            <?php var_dump($_SESSION['is_logged_in']);
-                                var_dump($_SESSION['vai_tro']);
-                                var_dump($_SESSION); ?>
+                            <!-- <?php
+                                var_dump($result); ?> -->
                             <div class="d-flex align-items-center justify-content-between manage-prd-title">
 
                                 <h1 class="text-white fw-bold p-3 fw-700">Quản Lý Sản Phẩm</h1>
@@ -93,68 +101,376 @@ if (isset($_SESSION['vai_tro']) && $_SESSION['vai_tro'] !== 'Quan Tri Vien') {
                                 </button>
                             </div>
                             <hr />
+                            <div class="input-group">
+                                <div class="form-outline" data-mdb-input-init>
+                                    <input type="search" id="form1" class="form-control" />
+                                    <label class="form-label" for="form1">Search</label>
+                                </div>
+                                <button type="button" class="btn btn-primary" data-mdb-ripple-init>
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
                             <div class="p-3 bg-white h-100 prd-list">
                                 <div class="table-responsive">
                                     <table class="table text-center">
                                         <thead>
                                             <tr>
                                                 <th>Mã Sinh Viên</th>
-                                                <th>Ảnh</th>
+                                                <th>Avatar</th>
                                                 <th>Họ Và Tên</th>
-                                                <th>Giá</th>
-                                                <th>Giá Khuyến Mại</th>
-                                                <th>Danh Mục</th>
-                                                <th>Tình Trạng</th>
-                                                <th>Hot</th>
-                                                <th>Mới Về</th>
-                                                <th class="prd-desc">Mô Tả</th>
+                                                <th>Năm sinh</th>
+                                                <th>CCCD</th>
+                                                <th>Giới Tính</th>
+                                                <th>Email</th>
+                                                <th>Số Điện Thoại</th>
+                                                <th>Quê Quán</th>
                                                 <th>Hành Động</th>
                                             </tr>
                                         </thead>
                                         <tbody>
+                                            <?php if (!empty($result)): ?>
+                                            <?php foreach ($result as $row): ?>
                                             <tr>
-                                                <td>6</td>
+                                                <td><?php echo htmlspecialchars($row['ma_sinh_vien']); ?></td>
                                                 <td>
-                                                    <img src="../assets/images/admin/room/room_1.jpg"
+                                                    <img src="<?php echo '../assets/images/avatar/' . ($row['avatar'] ? ltrim($row['avatar'], './') : '../../View/assets/images/avatar/student_avatar.png'); ?>"
                                                         alt="Product Image" />
+
                                                 </td>
-                                                <td>Áo Sơ Mi Nam</td>
-                                                <td>300,000 VND</td>
-                                                <td>250,000 VND</td>
-                                                <td class="bg-success text-white">Còn Hàng</td>
-                                                <td><i class="fa fa-times" style="color: red;"></i></td>
-                                                <td>Mới</td>
-                                                <td><i class="fa fa-check" style="color: green;"></i></td>
-                                                <td class="prd-desc">
-                                                    Áo sơ mi nam kiểu dáng hiện đại, chất liệu cotton mềm mại,
-                                                    dễ chịu. Phù hợp với nhiều dịp, từ công sở đến gặp gỡ bạn
-                                                    bè.
+                                                <td><?php echo htmlspecialchars($row['ho_ten']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['ngay_sinh']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['so_cmnd']); ?></td>
+                                                <td class="bg-success text-white">
+                                                    <?php echo htmlspecialchars($row['gioi_tinh']); ?></td>
+                                                <td>
+                                                    <?php echo htmlspecialchars($row['email']); ?>
                                                 </td>
+                                                <td><?php echo htmlspecialchars($row['so_dien_thoai'] ?: 'N/A'); ?></td>
+                                                <td><?php echo htmlspecialchars($row['que_quan'] ?: 'N/A'); ?></td>
                                                 <td class="d-flex align-items-center">
                                                     <button class="btn btn-success merge">Sửa</button>
                                                     <button class="btn btn-warning">Xóa</button>
                                                 </td>
                                             </tr>
+                                            <?php endforeach; ?>
+                                            <?php else: ?>
+                                            <tr>
+                                                <td colspan="10">Không có dữ liệu.</td>
+                                            </tr>
+                                            <?php endif; ?>
                                         </tbody>
+
                                     </table>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div id="content-category" class="content-tab p-4" style="display: none;">
-                        <h1>Quản Lý Danh Mục</h1>
+                        <div class="p-4 main-content bg-success">
+                            <?php
+                                // var_dump($room); ?>
+                            <div class="d-flex align-items-center justify-content-between manage-prd-title">
+
+                                <h1 class="text-white fw-bold p-3 fw-700">Quản Lý Phòng</h1>
+                                <button class="btn btn-success bg-white btn-add-prd">
+                                    Thêm Sản Phẩm
+                                </button>
+                            </div>
+                            <hr />
+                            <div class="input-group">
+                                <div class="form-outline" data-mdb-input-init>
+                                    <input type="search" id="form1" class="form-control" />
+                                    <label class="form-label" for="form1">Search</label>
+                                </div>
+                                <button type="button" class="btn btn-primary" data-mdb-ripple-init>
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div class="p-3 bg-white h-100 prd-list">
+                                <div class="table-responsive">
+                                    <table class="table text-center">
+                                        <thead>
+                                            <tr>
+                                                <th>Mã Sinh Viên</th>
+                                                <th>Avatar</th>
+                                                <th>Họ Và Tên</th>
+                                                <th>Năm sinh</th>
+                                                <th>CCCD</th>
+                                                <th>Giới Tính</th>
+                                                <th>Email</th>
+                                                <th>Số Điện Thoại</th>
+                                                <th>Quê Quán</th>
+                                                <th>Hành Động</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (!empty($result)): ?>
+                                            <?php foreach ($result as $row): ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($row['ma_sinh_vien']); ?></td>
+                                                <td>
+                                                    <img src="<?php echo '../assets/images/avatar/' . ($row['avatar'] ? ltrim($row['avatar'], './') : '../../View/assets/images/avatar/student_avatar.png'); ?>"
+                                                        alt="Product Image" />
+
+                                                </td>
+                                                <td><?php echo htmlspecialchars($row['ho_ten']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['ngay_sinh']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['so_cmnd']); ?></td>
+                                                <td class="bg-success text-white">
+                                                    <?php echo htmlspecialchars($row['gioi_tinh']); ?></td>
+                                                <td>
+                                                    <?php echo htmlspecialchars($row['email']); ?>
+                                                </td>
+                                                <td><?php echo htmlspecialchars($row['so_dien_thoai'] ?: 'N/A'); ?></td>
+                                                <td><?php echo htmlspecialchars($row['que_quan'] ?: 'N/A'); ?></td>
+                                                <td class="d-flex align-items-center">
+                                                    <button class="btn btn-success merge">Sửa</button>
+                                                    <button class="btn btn-warning">Xóa</button>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                            <?php else: ?>
+                                            <tr>
+                                                <td colspan="10">Không có dữ liệu.</td>
+                                            </tr>
+                                            <?php endif; ?>
+                                        </tbody>
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="content-account" class="content-tab p-4" style="display: none;">
-                        <h1>Quản Lý Tài Khoản</h1>
+                        <div class="p-4 main-content bg-success">
+                            <!-- <?php
+                                var_dump($result); ?> -->
+                            <div class="d-flex align-items-center justify-content-between manage-prd-title">
+
+                                <h1 class="text-white fw-bold p-3 fw-700">Quản Lý Hợp Đồng</h1>
+                                <button class="btn btn-success bg-white btn-add-prd">
+                                    Thêm Sản Phẩm
+                                </button>
+                            </div>
+                            <hr />
+                            <div class="input-group">
+                                <div class="form-outline" data-mdb-input-init>
+                                    <input type="search" id="form1" class="form-control" />
+                                    <label class="form-label" for="form1">Search</label>
+                                </div>
+                                <button type="button" class="btn btn-primary" data-mdb-ripple-init>
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div class="p-3 bg-white h-100 prd-list">
+                                <div class="table-responsive">
+                                    <table class="table text-center">
+                                        <thead>
+                                            <tr>
+                                                <th>Mã Sinh Viên</th>
+                                                <th>Avatar</th>
+                                                <th>Họ Và Tên</th>
+                                                <th>Năm sinh</th>
+                                                <th>CCCD</th>
+                                                <th>Giới Tính</th>
+                                                <th>Email</th>
+                                                <th>Số Điện Thoại</th>
+                                                <th>Quê Quán</th>
+                                                <th>Hành Động</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (!empty($result)): ?>
+                                            <?php foreach ($result as $row): ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($row['ma_sinh_vien']); ?></td>
+                                                <td>
+                                                    <img src="<?php echo '../assets/images/avatar/' . ($row['avatar'] ? ltrim($row['avatar'], './') : '../../View/assets/images/avatar/student_avatar.png'); ?>"
+                                                        alt="Product Image" />
+
+                                                </td>
+                                                <td><?php echo htmlspecialchars($row['ho_ten']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['ngay_sinh']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['so_cmnd']); ?></td>
+                                                <td class="bg-success text-white">
+                                                    <?php echo htmlspecialchars($row['gioi_tinh']); ?></td>
+                                                <td>
+                                                    <?php echo htmlspecialchars($row['email']); ?>
+                                                </td>
+                                                <td><?php echo htmlspecialchars($row['so_dien_thoai'] ?: 'N/A'); ?></td>
+                                                <td><?php echo htmlspecialchars($row['que_quan'] ?: 'N/A'); ?></td>
+                                                <td class="d-flex align-items-center">
+                                                    <button class="btn btn-success merge">Sửa</button>
+                                                    <button class="btn btn-warning">Xóa</button>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                            <?php else: ?>
+                                            <tr>
+                                                <td colspan="10">Không có dữ liệu.</td>
+                                            </tr>
+                                            <?php endif; ?>
+                                        </tbody>
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="content-transaction" class="content-tab p-4" style="display: none;">
-                        <h1>Quản Lý Giao Dịch</h1>
+                        <div class="p-4 main-content bg-success">
+                            <!-- <?php
+                                var_dump($result); ?> -->
+                            <div class="d-flex align-items-center justify-content-between manage-prd-title">
+
+                                <h1 class="text-white fw-bold p-3 fw-700">Quản Lý Hóa Đơn Phòng</h1>
+                                <button class="btn btn-success bg-white btn-add-prd">
+                                    Thêm Sản Phẩm
+                                </button>
+                            </div>
+                            <hr />
+                            <div class="input-group">
+                                <div class="form-outline" data-mdb-input-init>
+                                    <input type="search" id="form1" class="form-control" />
+                                    <label class="form-label" for="form1">Search</label>
+                                </div>
+                                <button type="button" class="btn btn-primary" data-mdb-ripple-init>
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div class="p-3 bg-white h-100 prd-list">
+                                <div class="table-responsive">
+                                    <table class="table text-center">
+                                        <thead>
+                                            <tr>
+                                                <th>Mã Sinh Viên</th>
+                                                <th>Avatar</th>
+                                                <th>Họ Và Tên</th>
+                                                <th>Năm sinh</th>
+                                                <th>CCCD</th>
+                                                <th>Giới Tính</th>
+                                                <th>Email</th>
+                                                <th>Số Điện Thoại</th>
+                                                <th>Quê Quán</th>
+                                                <th>Hành Động</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (!empty($result)): ?>
+                                            <?php foreach ($result as $row): ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($row['ma_sinh_vien']); ?></td>
+                                                <td>
+                                                    <img src="<?php echo '../assets/images/avatar/' . ($row['avatar'] ? ltrim($row['avatar'], './') : '../../View/assets/images/avatar/student_avatar.png'); ?>"
+                                                        alt="Product Image" />
+
+                                                </td>
+                                                <td><?php echo htmlspecialchars($row['ho_ten']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['ngay_sinh']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['so_cmnd']); ?></td>
+                                                <td class="bg-success text-white">
+                                                    <?php echo htmlspecialchars($row['gioi_tinh']); ?></td>
+                                                <td>
+                                                    <?php echo htmlspecialchars($row['email']); ?>
+                                                </td>
+                                                <td><?php echo htmlspecialchars($row['so_dien_thoai'] ?: 'N/A'); ?></td>
+                                                <td><?php echo htmlspecialchars($row['que_quan'] ?: 'N/A'); ?></td>
+                                                <td class="d-flex align-items-center">
+                                                    <button class="btn btn-success merge">Sửa</button>
+                                                    <button class="btn btn-warning">Xóa</button>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                            <?php else: ?>
+                                            <tr>
+                                                <td colspan="10">Không có dữ liệu.</td>
+                                            </tr>
+                                            <?php endif; ?>
+                                        </tbody>
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <div id="content-delivery" class="content-tab p-4" style="display: none;">
-                        <h1>Quản Lý Giao Hàng</h1>
+                        <div class="p-4 main-content bg-success">
+                            <!-- <?php
+                                var_dump($result); ?> -->
+                            <div class="d-flex align-items-center justify-content-between manage-prd-title">
+
+                                <h1 class="text-white fw-bold p-3 fw-700">Quản Lý Hóa Đơn Điện Nước</h1>
+                                <button class="btn btn-success bg-white btn-add-prd">
+                                    Thêm Sản Phẩm
+                                </button>
+                            </div>
+                            <hr />
+                            <div class="input-group">
+                                <div class="form-outline" data-mdb-input-init>
+                                    <input type="search" id="form1" class="form-control" />
+                                    <label class="form-label" for="form1">Search</label>
+                                </div>
+                                <button type="button" class="btn btn-primary" data-mdb-ripple-init>
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                            <div class="p-3 bg-white h-100 prd-list">
+                                <div class="table-responsive">
+                                    <table class="table text-center">
+                                        <thead>
+                                            <tr>
+                                                <th>Mã Sinh Viên</th>
+                                                <th>Avatar</th>
+                                                <th>Họ Và Tên</th>
+                                                <th>Năm sinh</th>
+                                                <th>CCCD</th>
+                                                <th>Giới Tính</th>
+                                                <th>Email</th>
+                                                <th>Số Điện Thoại</th>
+                                                <th>Quê Quán</th>
+                                                <th>Hành Động</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (!empty($result)): ?>
+                                            <?php foreach ($result as $row): ?>
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($row['ma_sinh_vien']); ?></td>
+                                                <td>
+                                                    <img src="<?php echo '../assets/images/avatar/' . ($row['avatar'] ? ltrim($row['avatar'], './') : '../../View/assets/images/avatar/student_avatar.png'); ?>"
+                                                        alt="Product Image" />
+
+                                                </td>
+                                                <td><?php echo htmlspecialchars($row['ho_ten']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['ngay_sinh']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['so_cmnd']); ?></td>
+                                                <td class="bg-success text-white">
+                                                    <?php echo htmlspecialchars($row['gioi_tinh']); ?></td>
+                                                <td>
+                                                    <?php echo htmlspecialchars($row['email']); ?>
+                                                </td>
+                                                <td><?php echo htmlspecialchars($row['so_dien_thoai'] ?: 'N/A'); ?></td>
+                                                <td><?php echo htmlspecialchars($row['que_quan'] ?: 'N/A'); ?></td>
+                                                <td class="d-flex align-items-center">
+                                                    <button class="btn btn-success merge">Sửa</button>
+                                                    <button class="btn btn-warning">Xóa</button>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                            <?php else: ?>
+                                            <tr>
+                                                <td colspan="10">Không có dữ liệu.</td>
+                                            </tr>
+                                            <?php endif; ?>
+                                        </tbody>
+
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
