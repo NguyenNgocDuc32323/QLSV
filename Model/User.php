@@ -35,7 +35,23 @@ class User {
         $stmt->execute();
         return $stmt->get_result()->num_rows > 0; // Return true if phone number exists
     }
+    public function checkRole($email) {
+        $query = "SELECT role FROM nguoidung WHERE email =?";
+    
+        $stmt = $this->conn->prepare($query);
 
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+    
+        $result = $stmt->get_result();
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            return $row['role']; 
+        } else {
+            return false;
+        }
+    }
+    
 
 
 public function registerUser($username, $email, $password, $phone, $gender, $birth) {

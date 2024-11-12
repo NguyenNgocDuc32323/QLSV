@@ -26,7 +26,7 @@ class ProfileController
         $profile_data = $profileModel->getProfileData($id_nguoidung);
         if (!$profile_data) {
             $_SESSION['login_failure'] = "Không tìm thấy dữ liệu người dùng.";
-            header('Location: login.php');
+            header('Location: dashboard.php');
             exit();
         }
         return $profile_data;

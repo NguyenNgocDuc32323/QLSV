@@ -36,7 +36,6 @@ class LoginController {
                     exit();
                 } else {
                     $_SESSION['login_failure'] = 'Bạn không có quyền truy cập. Vai trò không hợp lệ.';
-                    header('Location: login.php');
                     exit();
                 }
             }
@@ -84,18 +83,14 @@ class LoginController {
                         exit();
                     } else {
                         $_SESSION['login_failure'] = 'Bạn không có quyền truy cập. Vai trò không hợp lệ.';
-                        header('Location: login.php');
                         exit();
                     }
                 } else {
                     $_SESSION['login_failure'] = 'Thông tin đăng nhập không đúng.';
-                    header('Location: login.php');
                     exit();
                 }
             } else {
-                // Nếu có lỗi, lưu lỗi vào session và chuyển hướng lại về trang đăng nhập
                 $_SESSION['errors'] = $errors;
-                header('Location: login.php');
                 exit();
             }
         }

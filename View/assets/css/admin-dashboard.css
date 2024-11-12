@@ -231,3 +231,30 @@
     font-size: 1.25rem;
     margin-right: 0.5rem;
 }
+.dataTables_filter {
+    position: relative;
+}
+.dataTables_filter .btn-search {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 0.5rem;
+    font-size: 1.2rem;
+    background-color: transparent;
+    border: none;
+}
+.dataTables_filter .btn-search:hover{
+    color: #45BF55;
+}
+.content-wrapper {
+    background-color: #45BF55;
+    min-height: 100vh;
+}
+.btn-dashboard-block{
+    border-top: none !important;
+}
+.table-name{
+    color: #45BF55;
+    font-size: 1.3rem !important;
+    font-weight: 700;
+}

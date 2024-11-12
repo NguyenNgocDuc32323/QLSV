@@ -1,0 +1,27 @@
+.container-fluid {
+    padding: 0;
+    margin: 0;
+}
+.dashboard-main-body {
+    padding: 0 1.5rem;
+}
+.dashboard-main-body .mb-24 {
+    margin-block-end: 1.5rem !important;
+    border-bottom: 1px solid #fff;
+}
+.dashboard-main-body .mb-24 .body-title {
+    color: #fff;
+    font-weight: 700;
+    font-size: 2.5rem;
+    padding: 1rem;
+}
+.manage-block .col-12 .card .card-body .form-group label {
+    font-size: 1.25rem;
+    font-weight: bold;
+    color: #333;
+}
+.manage-block .col-12 .card .card-body .form-group input.form-control {
+    font-size: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.25rem;
+}

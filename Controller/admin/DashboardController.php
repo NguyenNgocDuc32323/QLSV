@@ -10,12 +10,10 @@ class DashboardController {
     }
      public function showProfile() {
         $profileModel = new Dashboard($this->conn);
-        $profile_data = $profileModel->getProfileData(); // Call the method without passing an ID
+        $profile_data = $profileModel->getProfileData();
 
         if (!$profile_data) {
             $_SESSION['login_failure'] = "Không tìm thấy dữ liệu người dùng.";
-            header('Location: login.php');
-            exit();
         }
 
         return $profile_data;
@@ -44,6 +42,23 @@ class DashboardController {
 
         return $contract_data;
     }
-
+    public function searchStudent(string $student){
+        $contractModel = new Dashboard($this->conn);
+        $searchDatas = $contractModel->searchStudent($student);
+        return $searchDatas;
+    }
+    public function deleteStudent(int $student) {
+        $contractModel = new Dashboard($this->conn);
+        $deleteSuccess = $contractModel->deleteStudent($student);
+    
+        if ($deleteSuccess) {
+            $_SESSION['success_message'] = 'Xóa thành công';
+        } else {
+            $_SESSION['error_message'] = 'Không thể xóa. Vui lòng thử lại.';
+        }
+    
+        // header('Location: dashboard.php');
+        // exit();
+    }
 }
 ?>
