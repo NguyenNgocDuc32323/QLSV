@@ -144,6 +144,23 @@ public function updatePassword($userId, $currentPassword, $newPassword) {
 
     return false;
 }
+public function checkCurrentPassword($userId, $currentPassword) {
+    // Giả sử bạn đã mã hóa mật khẩu trong cơ sở dữ liệu
+    $query = "SELECT mat_khau FROM nguoidung WHERE id = ?";
+    $stmt = $this->conn->prepare($query);
+    $stmt->bind_param("i", $userId); // "i" để bind integer
+    $stmt->execute();
+
+    $result = $stmt->get_result()->fetch_assoc(); // Lấy kết quả truy vấn
+
+    if ($result) {
+        // Kiểm tra mật khẩu hiện tại có khớp không
+        if (password_verify($currentPassword, $result['mat_khau'])) {
+            return true;
+        }
+    }
+    return false;
+}
 
 
 
