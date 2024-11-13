@@ -1,11 +1,10 @@
-
 <?php
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
 require_once '../../config/database.php';
-require_once '../../Controller/admin/DashboardController.php' ;
+require_once '../../Controller/admin/DashboardController.php';
 
 if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
     header('Location: ../login.php');
@@ -18,20 +17,18 @@ if (isset($_SESSION['vai_tro']) && $_SESSION['vai_tro'] !== 'Quan Tri Vien') {
 
     exit();
 }
-
-
 $database = new Database();
 $conn = $database->connect();
 $dashboardController = new DashboardController($conn);
 $result = $dashboardController->showProfile();
 $room = $dashboardController->showRoom();
 $contract = $dashboardController->showContract();
-if(isset($_GET['search_student'])){
-     $searchString = htmlspecialchars($_GET['search_student']);
-     $searchStudents = $dashboardController->searchStudent($searchString);
+if (isset($_GET['search_student'])) {
+    $searchString = htmlspecialchars($_GET['search_student']);
+    $searchStudents = $dashboardController->searchStudent($searchString);
 }
-if (isset($_GET['student_id'])) {
-    $student_id = $_GET['student_id'];
+if (isset($_GET['delete_student_id'])) {
+    $student_id = $_GET['delete_student_id'];
     $get_contracts = mysqli_query($conn, "SELECT id FROM hopdong WHERE id_hoc_sinh = $student_id");
     while ($contract = mysqli_fetch_assoc($get_contracts)) {
         $contract_id = $contract['id'];
@@ -83,81 +80,9 @@ if (isset($_GET['student_id'])) {
 
 <body>
     <div class="d-flex align-items-center">
-        <div class="sidebar text-white position-fixed vh-100 p-3">
-            <a href="../../View/admin/dashboard.php" class="d-block text-center my-3">
-                <img src="../assets/images/logo.webp" alt="site logo" class="img-fluid" style="max-height: 80px" />
-            </a>
-            <nav class="sidebar-menu-area">
-                <ul class="nav flex-column" id="sidebar-menu">
-                    <li class="nav-item bg-success" id="tab-product">
-                        <a href="#" class="nav-link text-white">
-                            <i class="fa-solid fa-user me-2"></i>
-                            Sinh Viên
-                        </a>
-                    </li>
-                    <li class="nav-item bg-success" id="tab-category">
-                        <a href="#" class="nav-link text-white">
-                            <i class="fa-solid fa-list me-2"></i>
-                            Phòng
-                        </a>
-                    </li>
-                    <li class="nav-item bg-success" id="tab-account">
-                        <a href="#" class="nav-link text-white">
-                            <i class="fa-solid fa-bottle-water me-2"></i>
-                            Hợp Đồng
-                        </a>
-                    </li>
-                    <li class="nav-item bg-success" id="tab-transaction">
-                        <a href="#" class="nav-link text-white">
-                            <i class="fa-solid fa-cart-shopping me-2"></i>
-                            Hóa Đơn Phòng
-                        </a>
-                    </li>
-                    <li class="nav-item bg-success" id="tab-delivery">
-                        <a href="#" class="nav-link text-white">
-                            <i class="fa-solid fa-truck-fast me-2"></i>
-                            Hóa Đơn Điện Nước
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </div>
+        <?php include '../admin/sidebar.php'; ?>
         <div class="dashboard-main">
-            <div class="d-flex align-items-center justify-content-between p-4">
-                <i class="fa-solid fa-bars btn btn-success btn-navbar"></i>
-                <div class="user-infor">
-                    <div class="dropdown">
-                        <button class="d-flex justify-content-center align-items-center rounded-circle" type="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <img src="../assets/images/admin/admin.png" alt="image"
-                                class="user-image object-fit-cover rounded-circle">
-                        </button>
-                        <div class="dropdown-menu to-top dropdown-menu-sm" aria-labelledby="dropdownMenuButton">
-                            <div class="drop-header d-flex align-items-center justify-content-between">
-                                <div>
-                                    <h6 class="drop-user-name">Nguyen Ngoc Duc</h6>
-                                    <span class="drop-user-role">admin</span>
-                                </div>
-                            </div>
-                            <ul class="to-top-list">
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center" href="../../View/index.php">
-                                        <i class="icon-user-item fa-regular fa-user"></i> <span>Trang Người Dùng</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item d-flex align-items-center"
-                                        href="../../Controller/logoutController.php">
-                                        <i class="icon-user-item fa-solid fa-power-off"></i><span>Đăng Xuất</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
+            <?php include '../admin/navbar.php'; ?>
             <div class="content">
                 <div id="content-product" class="content-tab">
                     <div class="p-4 main-content bg-success">
@@ -165,15 +90,20 @@ if (isset($_GET['student_id'])) {
                             <h1 class="text-white fw-bold p-3 fw-700">Quản Lý Sinh Viên</h1>
                         </div>
                         <div class="p-3 bg-white h-100 prd-list">
-                        <div class="d-flex justify-content-between align-items-center mb-3 card-body-item">
+                            <div class="d-flex justify-content-between align-items-center mb-3 card-body-item">
                                 <div></div>
-                                <form id="order-listing_filter" class="dataTables_filter" method="GET" action="<?= $_SERVER['PHP_SELF'] ?>">
-                                <input type="text" id="search_student" name="search_student" class="form-control" placeholder="Search" value="<?php if(isset($_GET['search_student'])){echo htmlspecialchars($_GET['search_student']);}?>">
+                                <form id="order-listing_filter" class="dataTables_filter" method="GET"
+                                    action="<?= $_SERVER['PHP_SELF'] ?>">
+                                    <input type="text" id="search_student" name="search_student" class="form-control"
+                                        placeholder="Search"
+                                        value="<?php if (isset($_GET['search_student'])) {
+                                                    echo htmlspecialchars($_GET['search_student']);
+                                                } ?>">
                                     <button type="submit" class="btn-search">
                                         <i class="fa-solid fa-magnifying-glass"></i>
                                     </button>
                                 </form>
-                        </div>
+                            </div>
                             <div class="table-responsive">
                                 <table class="table text-center">
                                     <thead>
@@ -196,19 +126,22 @@ if (isset($_GET['student_id'])) {
                                                 <tr>
                                                     <td><?php echo htmlspecialchars($row['ma_sinh_vien']); ?></td>
                                                     <td>
-                                                        <img src="<?php echo $row['avatar'] ? '../assets/images/avatar/'.$row['avatar'] : '../assets/images/avatar/student_avatar.png'; ?>"
+                                                        <img src="<?php echo $row['avatar'] ? '../assets/images/avatar/' . $row['avatar'] : '../assets/images/avatar/student_avatar.png'; ?>"
                                                             alt="Product Image" />
                                                     </td>
-                                                    <td class="fw-bold table-name"><?php echo htmlspecialchars($row['ho_ten']); ?></td>
+                                                    <td class="fw-bold table-name">
+                                                        <?php echo htmlspecialchars($row['ho_ten']); ?></td>
                                                     <td><?php echo htmlspecialchars($row['ngay_sinh']); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['so_cmnd']); ?></td>
+                                                    <td><?php echo $row['so_cmnd'] ? $row['so_cmnd'] : ""; ?></td>
                                                     <td><?php echo htmlspecialchars($row['gioi_tinh']); ?></td>
                                                     <td><?php echo htmlspecialchars($row['email']); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['so_dien_thoai'] ?: 'N/A'); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['que_quan'] ?: 'N/A'); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['so_dien_thoai'] ?: ''); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['que_quan'] ?: ''); ?></td>
                                                     <td class="d-flex align-items-center btn-dashboard-block">
-                                                        <a href="edit_student.php" class="btn btn-success merge">Sửa</a>
-                                                        <a href="dashboard.php?student_id=<?php echo $row['hoc_sinh_id'] ?>" class="btn btn-warning delete-btn-student">Xóa</a>
+                                                        <a href="edit_student.php?student_id=<?php echo $row['hoc_sinh_id']; ?>"
+                                                            class="btn btn-success merge">Sửa</a>
+                                                        <a href="dashboard.php?delete_student_id=<?php echo $row['hoc_sinh_id'] ?>"
+                                                            class="btn btn-warning delete-btn-student">Xóa</a>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>
@@ -221,19 +154,22 @@ if (isset($_GET['student_id'])) {
                                                 <tr>
                                                     <td><?php echo htmlspecialchars($row['ma_sinh_vien']); ?></td>
                                                     <td>
-                                                        <img src="<?php echo $row['avatar'] ? '../assets/images/avatar/'.$row['avatar'] : '../assets/images/avatar/student_avatar.png'; ?>"
+                                                        <img src="<?php echo $row['avatar'] ? '../assets/images/avatar/' . $row['avatar'] : '../assets/images/avatar/student_avatar.png'; ?>"
                                                             alt="Product Image" />
                                                     </td>
-                                                    <td class="fw-bold table-name"><?php echo htmlspecialchars($row['ho_ten']); ?></td>
+                                                    <td class="fw-bold table-name">
+                                                        <?php echo htmlspecialchars($row['ho_ten']); ?></td>
                                                     <td><?php echo htmlspecialchars($row['ngay_sinh']); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['so_cmnd']); ?></td>
+                                                    <td><?php echo $row['so_cmnd'] ? $row['so_cmnd'] : "" ?></td>
                                                     <td><?php echo htmlspecialchars($row['gioi_tinh']); ?></td>
                                                     <td><?php echo htmlspecialchars($row['email']); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['so_dien_thoai'] ?: 'N/A'); ?></td>
-                                                    <td><?php echo htmlspecialchars($row['que_quan'] ?: 'N/A'); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['so_dien_thoai'] ?: ''); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['que_quan'] ?: ''); ?></td>
                                                     <td class="d-flex align-items-center btn-dashboard-block">
-                                                        <a href="edit_student.php" class="btn btn-success merge">Sửa</a>
-                                                        <a href="dashboard.php?student_id=<?php echo $row['hoc_sinh_id'] ?>" class="btn btn-warning delete-btn-student">Xóa</a>
+                                                        <a href="edit_student.php?student_id=<?php echo $row['hoc_sinh_id']; ?>"
+                                                            class="btn btn-success merge">Sửa</a>
+                                                        <a href="dashboard.php?delete_student_id=<?php echo $row['hoc_sinh_id'] ?>"
+                                                            class="btn btn-warning delete-btn-student">Xóa</a>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>
@@ -250,95 +186,198 @@ if (isset($_GET['student_id'])) {
 
                     </div>
                 </div>
-            </div>
-        </div>
-        <div id="content-category" class="content-tab p-4" style="display: none;">
-            <h1>Quản Lý Danh Mục</h1>
-        </div>
-        <div id="content-category" class="content-tab p-4" style="display: none;">
-            <div class="p-4 main-content bg-success">
-                <div class="d-flex align-items-center justify-content-between manage-prd-title">
-
-                    <div id="content-account" class="content-tab p-4" style="display: none;">
-                        <h1>Quản Lý Tài Khoản</h1>
-                    </div>
-                    <h1 class="text-white fw-bold p-3 fw-700">Quản Lý Phòng</h1>
-                    <button class="btn btn-success bg-white btn-add-prd">
-                        Thêm Sản Phẩm
-                    </button>
-                </div>
-                <hr />
-                <div class="input-group">
-                    <div class="form-outline" data-mdb-input-init>
-                        <input type="search" id="form1" class="form-control" />
-                        <label class="form-label" for="form1">Search</label>
-                    </div>
-                    <button type="button" class="btn btn-primary" data-mdb-ripple-init>
-                        <i class="fas fa-search"></i>
-                    </button>
-                </div>
-                <div class="p-3 bg-white h-100 prd-list">
-                    <div class="table-responsive">
-                        <table class="table text-center">
-                            <thead>
-                                <tr>
-                                    <th>Mã Sinh Viên</th>
-                                    <th>Avatar</th>
-                                    <th>Họ Và Tên</th>
-                                    <th>Năm sinh</th>
-                                    <th>CCCD</th>
-                                    <th>Giới Tính</th>
-                                    <th>Email</th>
-                                    <th>Số Điện Thoại</th>
-                                    <th>Quê Quán</th>
-                                    <th>Hành Động</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (!empty($result)): ?>
-                                    <?php foreach ($result as $row): ?>
+                <div id="content-category" class="content-tab" style="display: none;">
+                <div class="p-4 main-content bg-success">
+                        <div class="d-flex align-items-center justify-content-between manage-prd-title">
+                            <h1 class="text-white fw-bold p-3 fw-700">Quản Lý Phòng</h1>
+                            <a href="create_room.php" class="btn bg-white btn-add-admin">Thêm Phòng</a>
+                        </div>
+                        <div class="p-3 bg-white h-100 prd-list">
+                            <div class="d-flex justify-content-between align-items-center mb-3 card-body-item">
+                                <div></div>
+                                <form id="order-listing_filter" class="dataTables_filter" method="GET"
+                                    action="<?= $_SERVER['PHP_SELF'] ?>">
+                                    <input type="text" id="search_student" name="search_student" class="form-control"
+                                        placeholder="Search"
+                                        value="<?php if (isset($_GET['search_student'])) {
+                                                    echo htmlspecialchars($_GET['search_student']);
+                                                } ?>">
+                                    <button type="submit" class="btn-search">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table text-center">
+                                    <thead>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($row['ma_sinh_vien']); ?></td>
-                                            <td>
-                                                <img src="<?php echo '../assets/images/avatar/' . ($row['avatar'] ? ltrim($row['avatar'], './') : '../../View/assets/images/avatar/student_avatar.png'); ?>"
-                                                    alt="Product Image" />
-
-                                                <div id="content-transaction" class="content-tab p-4" style="display: none;">
-                                                    <h1>Quản Lý Giao Dịch</h1>
-                                                </div>
-                                            </td>
-                                            <td><?php echo htmlspecialchars($row['ho_ten']); ?></td>
-                                            <td><?php echo htmlspecialchars($row['ngay_sinh']); ?></td>
-                                            <td><?php echo htmlspecialchars($row['so_cmnd']); ?></td>
-                                            <td>
-                                                <?php echo htmlspecialchars($row['gioi_tinh']); ?>
-                                            </td>
-                                            <td>
-                                                <?php echo htmlspecialchars($row['email']); ?>
-                                            </td>
-                                            <td><?php echo htmlspecialchars($row['so_dien_thoai'] ?: 'N/A'); ?></td>
-                                            <td><?php echo htmlspecialchars($row['que_quan'] ?: 'N/A'); ?></td>
-                                            <td class="d-flex align-items-center">
-                                                <button class="btn btn-success merge">Sửa</button>
-                                                <button class="btn btn-warning">Xóa</button>
-                                            </td>
+                                            <th>Mã Sinh Viên</th>
+                                            <th>Avatar</th>
+                                            <th>Họ Và Tên</th>
+                                            <th>Năm sinh</th>
+                                            <th>CCCD</th>
+                                            <th>Giới Tính</th>
+                                            <th>Email</th>
+                                            <th>Số Điện Thoại</th>
+                                            <th>Quê Quán</th>
+                                            <th>Hành Động</th>
                                         </tr>
-                                    <?php endforeach; ?>
-                                <?php else: ?>
-                                    <tr>
-                                        <td colspan="10">Không có dữ liệu.</td>
-                                    </tr>
-                                <?php endif; ?>
-                            </tbody>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (isset($searchStudents) && !empty($searchStudents)): ?>
+                                            <?php foreach ($searchStudents as $row): ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($row['ma_sinh_vien']); ?></td>
+                                                    <td>
+                                                        <img src="<?php echo $row['avatar'] ? '../assets/images/avatar/' . $row['avatar'] : '../assets/images/avatar/student_avatar.png'; ?>"
+                                                            alt="Product Image" />
+                                                    </td>
+                                                    <td class="fw-bold table-name">
+                                                        <?php echo htmlspecialchars($row['ho_ten']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['ngay_sinh']); ?></td>
+                                                    <td><?php echo $row['so_cmnd'] ? $row['so_cmnd'] : ""; ?></td>
+                                                    <td><?php echo htmlspecialchars($row['gioi_tinh']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['email']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['so_dien_thoai'] ?: ''); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['que_quan'] ?: ''); ?></td>
+                                                    <td class="d-flex align-items-center btn-dashboard-block">
+                                                        <a href="edit_student.php?student_id=<?php echo $row['hoc_sinh_id']; ?>"
+                                                            class="btn btn-success merge">Sửa</a>
+                                                        <a href="dashboard.php?delete_student_id=<?php echo $row['hoc_sinh_id'] ?>"
+                                                            class="btn btn-warning delete-btn-student">Xóa</a>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php elseif (isset($searchStudents) && empty($searchStudents)): ?>
+                                            <tr>
+                                                <td colspan="10">Không có dữ liệu tìm kiếm.</td>
+                                            </tr>
+                                        <?php elseif (!empty($result)): ?>
+                                            <?php foreach ($result as $row): ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($row['ma_sinh_vien']); ?></td>
+                                                    <td>
+                                                        <img src="<?php echo $row['avatar'] ? '../assets/images/avatar/' . $row['avatar'] : '../assets/images/avatar/student_avatar.png'; ?>"
+                                                            alt="Product Image" />
+                                                    </td>
+                                                    <td class="fw-bold table-name">
+                                                        <?php echo htmlspecialchars($row['ho_ten']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['ngay_sinh']); ?></td>
+                                                    <td><?php echo $row['so_cmnd'] ? $row['so_cmnd'] : "" ?></td>
+                                                    <td><?php echo htmlspecialchars($row['gioi_tinh']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['email']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['so_dien_thoai'] ?: ''); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['que_quan'] ?: ''); ?></td>
+                                                    <td class="d-flex align-items-center btn-dashboard-block">
+                                                        <a href="edit_student.php?student_id=<?php echo $row['hoc_sinh_id']; ?>"
+                                                            class="btn btn-success merge">Sửa</a>
+                                                        <a href="dashboard.php?delete_student_id=<?php echo $row['hoc_sinh_id'] ?>"
+                                                            class="btn btn-warning delete-btn-student">Xóa</a>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr>
+                                                <td colspan="10">Không có dữ liệu.</td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <ul class="to-top-list">
 
-                        </table>
+                    </div>
+                </div>
+                <div id="content-category" class="content-tab" style="display: none;">
+                    <div class="p-4 main-content bg-success">
+                        <div class="d-flex align-items-center justify-content-between manage-prd-title">
+
+                            <div id="content-account" class="content-tab p-4" style="display: none;">
+                                <h1>Quản Lý Tài Khoản</h1>
+                            </div>
+                            <h1 class="text-white fw-bold p-3 fw-700">Quản Lý Phòng</h1>
+                            <button class="btn btn-success bg-white btn-add-prd">
+                                Thêm Sản Phẩm
+                            </button>
+                        </div>
+                        <hr />
+                        <div class="input-group">
+                            <div class="form-outline" data-mdb-input-init>
+                                <input type="search" id="form1" class="form-control" />
+                                <label class="form-label" for="form1">Search</label>
+                            </div>
+                            <button type="button" class="btn btn-primary" data-mdb-ripple-init>
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                        <div class="p-3 bg-white h-100 prd-list">
+                            <div class="table-responsive">
+                                <table class="table text-center">
+                                    <thead>
+                                        <tr>
+                                            <th>Mã Sinh Viên</th>
+                                            <th>Avatar</th>
+                                            <th>Họ Và Tên</th>
+                                            <th>Năm sinh</th>
+                                            <th>CCCD</th>
+                                            <th>Giới Tính</th>
+                                            <th>Email</th>
+                                            <th>Số Điện Thoại</th>
+                                            <th>Quê Quán</th>
+                                            <th>Hành Động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!empty($result)): ?>
+                                            <?php foreach ($result as $row): ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($row['ma_sinh_vien']); ?></td>
+                                                    <td>
+                                                        <img src="<?php echo '../assets/images/avatar/' . ($row['avatar'] ? ltrim($row['avatar'], './') : '../../View/assets/images/avatar/student_avatar.png'); ?>"
+                                                            alt="Product Image" />
+
+                                                        <div id="content-transaction" class="content-tab p-4"
+                                                            style="display: none;">
+                                                            <h1>Quản Lý Giao Dịch</h1>
+                                                        </div>
+                                                    </td>
+                                                    <td><?php echo htmlspecialchars($row['ho_ten']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['ngay_sinh']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['so_cmnd']); ?></td>
+                                                    <td>
+                                                        <?php echo htmlspecialchars($row['gioi_tinh']); ?>
+                                                    </td>
+                                                    <td>
+                                                        <?php echo htmlspecialchars($row['email']); ?>
+                                                    </td>
+                                                    <td><?php echo htmlspecialchars($row['so_dien_thoai'] ?: 'N/A'); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['que_quan'] ?: 'N/A'); ?></td>
+                                                    <td class="d-flex align-items-center">
+                                                        <button class="btn btn-success merge">Sửa</button>
+                                                        <button class="btn btn-warning">Xóa</button>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr>
+                                                <td colspan="10">Không có dữ liệu.</td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-    
+
+
         <script src="../assets/js/admin-dashboard.js"></script>
+        
 </body>
 
 </html>

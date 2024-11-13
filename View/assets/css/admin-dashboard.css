@@ -258,3 +258,13 @@
     font-size: 1.3rem !important;
     font-weight: 700;
 }
+.file-input{
+    height: 45px;
+}
+.btn-add-admin{
+    color: #45BF55;
+    font-size: 18px;
+}
+.btn-add-admin:hover{
+    color: #45BF55;
+}

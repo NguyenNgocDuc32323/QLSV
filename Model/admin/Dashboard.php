@@ -174,7 +174,23 @@ class Dashboard {
             return false;
         }
     }
-    
+    public function getAdmin(int $admin_id){
+        $query = "SELECT * FROM nguoidung WHERE id =?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $admin_id);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
+    }
+    public function getUser(int $user_id){
+        $query = "SELECT hocsinh.id AS hoc_sinh_id, hocsinh.*, nguoidung.* 
+                  FROM hocsinh 
+                  JOIN nguoidung ON hocsinh.id_nguoi_dung = nguoidung.id 
+                  WHERE hocsinh.id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
+    }    
     public function deleteStudent(int $student_id) {
         $this->conn->begin_transaction();
     
@@ -252,6 +268,114 @@ class Dashboard {
             $this->conn->rollback();
             return "Lỗi khi xóa sinh viên: " . $e->getMessage();
         }
+    }
+    public function updateStudentProfileData($student_id, $fullName, $email, $phone, $birthYear, $gender, $idNumber, $hometown, $avatar) {
+        if ($gender === 'male') {
+            $gender = 'Nam';
+        } elseif ($gender === 'female') {
+            $gender = 'Nữ';
+        } elseif ($gender === 'other') {
+            $gender = 'Khác';
+        } else {
+            $gender = 'Nam';
+        }
+        if ($avatar) {
+            $query = "
+                UPDATE hocsinh AS hs
+                JOIN nguoidung AS nd ON nd.id = hs.id_nguoi_dung
+                SET 
+                    nd.ho_ten = ?, 
+                    nd.email = ?, 
+                    nd.so_dien_thoai = ?, 
+                    nd.ngay_sinh = ?, 
+                    nd.gioi_tinh = ?, 
+                    nd.avatar = ?, 
+                    hs.so_cmnd = ?, 
+                    hs.que_quan = ? 
+                WHERE 
+                    hs.id = ?
+            ";
+        } else {
+            $query = "
+                UPDATE hocsinh AS hs
+                JOIN nguoidung AS nd ON nd.id = hs.id_nguoi_dung
+                SET 
+                    nd.ho_ten = ?, 
+                    nd.email = ?, 
+                    nd.so_dien_thoai = ?, 
+                    nd.ngay_sinh = ?, 
+                    nd.gioi_tinh = ?, 
+                    hs.so_cmnd = ?, 
+                    hs.que_quan = ? 
+                WHERE 
+                    hs.id = ?
+            ";
+        }
+    
+        if ($stmt = $this->conn->prepare($query)) {
+            if ($avatar) {
+                $stmt->bind_param("ssssssssi", $fullName, $email, $phone, $birthYear, $gender, $avatar, $idNumber, $hometown, $student_id);
+            } else {
+                $stmt->bind_param("sssssssi", $fullName, $email, $phone, $birthYear, $gender, $idNumber, $hometown, $student_id);
+            }
+    
+            // Thực thi câu lệnh SQL và kiểm tra kết quả
+            if ($stmt->execute()) {
+                return true;  // Thành công
+            } else {
+                return false; // Lỗi khi thực thi
+            }
+        } else {
+            return false;  // Lỗi khi chuẩn bị câu lệnh
+        }
+    }
+    
+
+    public function updatePassword($userId, $currentPassword, $newPassword) {
+        // Initialize $storedPassword to avoid warnings
+        $storedPassword = null;
+
+        // Query to fetch the current password hash
+        $query = "SELECT mat_khau FROM nguoidung WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+
+        if ($stmt) {
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $stmt->store_result();
+
+            // Check if the result has a row
+            if ($stmt->num_rows > 0) {
+                $stmt->bind_result($storedPassword);
+                $stmt->fetch();
+            } else {
+                // Handle case where no user is found
+                return false; 
+            }
+
+            $stmt->close();
+        } else {
+            // Handle preparation failure
+            return false;
+        }
+        if ($storedPassword !== null && sha1($currentPassword) === $storedPassword) {
+            $newHashedPassword = sha1($newPassword);
+            $updateQuery = "UPDATE nguoidung SET mat_khau = ? WHERE id = ?";
+            $updateStmt = $this->conn->prepare($updateQuery);
+
+            if ($updateStmt) {
+                $updateStmt->bind_param("si", $newHashedPassword, $userId);
+
+                if ($updateStmt->execute()) {
+                    $updateStmt->close();
+                    return true; // Password updated successfully
+                }
+
+                $updateStmt->close();
+            }
+        }
+
+        return false;
     }
     }
 

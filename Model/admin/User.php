@@ -47,6 +47,12 @@ class User {
 //     }
 // }
 
-
+    public function getUserById($user_id){
+        $query = "SELECT * FROM nguoidung WHERE id =?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_assoc();
+    }
 }
 ?>
