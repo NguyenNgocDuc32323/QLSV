@@ -1,6 +1,7 @@
 <?php
 session_start();
 $isLoggedIn = isset($_SESSION['is_logged_in']) && $_SESSION['is_logged_in'];
+$vai_tro = isset($_SESSION['vai_tro']) ? $_SESSION['vai_tro'] : ''; 
 if (isset($_SESSION['login_success']) && $_SESSION['login_success']) {
     $login_success = $_SESSION['login_success'];
     echo "<script class='text-success'>alert('{$login_success}');</script>";
@@ -59,6 +60,12 @@ if (isset($_SESSION['login_success']) && $_SESSION['login_success']) {
                         </div>
                         <div class="tutorial-body-bottom">
                             <?php if ($isLoggedIn): ?>
+                            <?php if ($vai_tro === 'Quan Tri Vien'): ?>
+                            <a href="./admin/dashboard.php" class="tutorial-body-bottom-item">
+                                <i class="far fa-edit"></i>
+                                <div id="text-guide-model3d">Quản Lý Ký Túc Xá</div>
+                            </a>
+                            <?php endif; ?>
                             <a href="profile.php" class="tutorial-body-bottom-item">
                                 <i class="far fa-edit"></i>
                                 <div id="text-guide-model3d">Chỉnh Sửa Cá Nhân</div>
@@ -70,6 +77,7 @@ if (isset($_SESSION['login_success']) && $_SESSION['login_success']) {
 
 
                             <?php else: ?>
+
                             <a href="profile.php" class="tutorial-body-bottom-item">
                                 <i class="far fa-edit"></i>
                                 <div id="text-guide-model3d">Chỉnh Sửa Cá Nhân</div>
