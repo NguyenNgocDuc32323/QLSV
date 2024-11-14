@@ -37,7 +37,8 @@ class Room {
         phong.mo_ta, 
         phong.trang_thai_phong,
         phong.nhan_vien_phu_trach,
-        nguoidung.ho_ten as ten_nhan_vien
+        nguoidung.ho_ten as ten_nhan_vien,
+        phong.anh_phong
     FROM phong
     LEFT JOIN nguoidung ON phong.nhan_vien_phu_trach = nguoidung.id
     WHERE 

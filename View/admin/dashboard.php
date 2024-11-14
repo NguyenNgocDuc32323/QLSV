@@ -74,43 +74,17 @@ if (isset($_GET['delete_student_id'])) {
 
 if (isset($_GET['delete_room_id'])) {
     $room_id = $_GET['delete_room_id'];
-
-    // Delete related payment records
-    $delete_payments = mysqli_query($conn, "
-        DELETE FROM thanhtoan 
-        WHERE id_hoa_don IN (SELECT id FROM hoadon WHERE id_phong = $room_id)
-    ");
-
-    // Delete related invoice details
-    $delete_invoice_details = mysqli_query($conn, "
-        DELETE FROM chitiethoadon 
-        WHERE id_hoa_don IN (SELECT id FROM hoadon WHERE id_phong = $room_id)
-    ");
-
-    // Delete related invoices
-    $delete_invoices = mysqli_query($conn, "
-        DELETE FROM hoadon 
-        WHERE id_phong = $room_id
-    ");
-
-    // Delete contracts related to the room
-    $delete_contracts = mysqli_query($conn, "
-        DELETE FROM hopdong WHERE id_phong = $room_id
-    ");
-
-    // Delete the room itself
     $delete_room = mysqli_query($conn, "
         DELETE FROM phong WHERE id = $room_id
     ");
 
-    // Check if room deletion was successful
     if ($delete_room) {
         echo "Deleted room and related information successfully!";
-        header("Location: ../../View/admin/dashboard.php");
+        header("Location: ../../View/admin/dashboard.php?tab=category");
         exit();
     } else {
         echo "Failed to delete room!";
-        header("Location: ../../View/admin/dashboard.php");
+        header("Location: ../../View/admin/dashboard.php?tab=category");
         exit();
     }
 } 
@@ -281,12 +255,8 @@ if (isset($_GET['delete_room_id'])) {
                                             <tr>
                                                 <td><?php echo htmlspecialchars($row['ma_phong']); ?></td>
                                                 <td>
-                                                    <?php if (!empty($row['anh_phong']) && $row['anh_phong'] !== null): ?>
-                                                    <img src="<?php echo '../assets/images/room/' . htmlspecialchars($row['anh_phong']); ?>"
-                                                        alt="Product Image" />
-                                                    <?php endif; ?>
-
-
+                                                    <img src="<?php echo '../assets/images/room/'.htmlspecialchars($row['anh_phong']); ?>"
+                                                    alt="Product Image" />
                                                 </td>
                                                 <td class="fw-bold table-name">
                                                     <?php echo htmlspecialchars($row['tang']); ?></td>
@@ -333,7 +303,7 @@ if (isset($_GET['delete_room_id'])) {
                                                 <td class="d-flex align-items-center btn-dashboard-block">
                                                     <a href="edit_room.php?phong_id=<?php echo $row['phong_id']; ?>"
                                                         class="btn btn-success merge">Sửa</a>
-                                                    <a href="dashboard.php?phong_id="
+                                                    <a href="dashboard.php?delete_room_id=<?php echo $row['phong_id']?>"
                                                         class="btn btn-warning delete-btn-student">Xóa</a>
                                                 </td>
                                             </tr>
