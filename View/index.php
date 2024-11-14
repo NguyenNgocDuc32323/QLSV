@@ -62,7 +62,7 @@ if (isset($_SESSION['login_success']) && $_SESSION['login_success']) {
                             <?php if ($isLoggedIn): ?>
                             <?php if ($vai_tro === 'Quan Tri Vien'): ?>
                             <a href="./admin/dashboard.php" class="tutorial-body-bottom-item">
-                                <i class="far fa-edit"></i>
+                                <i class="fa-solid fa-people-roof"></i>
                                 <div id="text-guide-model3d">Quản Lý Ký Túc Xá</div>
                             </a>
                             <?php endif; ?>
