@@ -248,16 +248,17 @@ if (isset($_GET['delete_room_id'])) {
                                 <div class="d-flex justify-content-between align-items-center mb-3 card-body-item">
                                     <div></div>
                                     <form id="order-listing_filter" class="dataTables_filter" method="GET"
-                                        action="<?= $_SERVER['PHP_SELF']; ?>?tab=category&<?= http_build_query($_GET); ?>">
-
+                                        action="dashboard.php">
+                                        <input type="hidden" name="tab" value="category">
                                         <input type="text" id="search_rooms" name="search_rooms" class="form-control"
                                             placeholder="Search" value="<?php if (isset($_GET['search_rooms'])) {
-                                                    echo htmlspecialchars($_GET['search_rooms']);
-                                                } ?>">
+                                                echo htmlspecialchars($_GET['search_rooms']);
+                                            } ?>">
                                         <button type="submit" class="btn-search">
                                             <i class="fa-solid fa-magnifying-glass"></i>
                                         </button>
                                     </form>
+
                                 </div>
                                 <div class="table-responsive">
                                     <table class="table text-center">
@@ -280,8 +281,12 @@ if (isset($_GET['delete_room_id'])) {
                                             <tr>
                                                 <td><?php echo htmlspecialchars($row['ma_phong']); ?></td>
                                                 <td>
-                                                    <img src="<?php echo $row['anh_phong'] ? '../assets/images/room/' . $row['anh_phong'] : '../assets/images/room/room.jpg'; ?>"
+                                                    <?php if (!empty($row['anh_phong']) && $row['anh_phong'] !== null): ?>
+                                                    <img src="<?php echo '../assets/images/room/' . htmlspecialchars($row['anh_phong']); ?>"
                                                         alt="Product Image" />
+                                                    <?php endif; ?>
+
+
                                                 </td>
                                                 <td class="fw-bold table-name">
                                                     <?php echo htmlspecialchars($row['tang']); ?></td>
@@ -290,7 +295,7 @@ if (isset($_GET['delete_room_id'])) {
                                                 </td>
                                                 <td><?php echo htmlspecialchars($row['mo_ta']); ?></td>
                                                 <td><?php echo htmlspecialchars($row['trang_thai_phong']); ?></td>
-                                                <td><?php echo htmlspecialchars($row['ho_ten'] ?: ''); ?>
+                                                <td><?php echo htmlspecialchars($row['ten_nhan_vien'] ?: ''); ?>
                                                 </td>
 
                                                 <td class="d-flex align-items-center btn-dashboard-block">
@@ -310,8 +315,10 @@ if (isset($_GET['delete_room_id'])) {
                                             <tr>
                                                 <td><?php echo htmlspecialchars($row['ma_phong']); ?></td>
                                                 <td>
-                                                    <img src="<?php echo $row['anh_phong'] ? '../assets/images/room/' . $row['anh_phong'] : '../assets/images/room/room.jpg'; ?>"
+                                                    <?php if (!empty($row['anh_phong']) && $row['anh_phong'] !== null): ?>
+                                                    <img src="<?php echo '../assets/images/room/' . htmlspecialchars($row['anh_phong']); ?>"
                                                         alt="Product Image" />
+                                                    <?php endif; ?>
                                                 </td>
                                                 <td class="fw-bold table-name">
                                                     <?php echo htmlspecialchars($row['tang']); ?></td>

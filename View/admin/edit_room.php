@@ -106,7 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_profile'])) {
                                             <div class="tab-content" id="myTabContent">
                                                 <div class="tab-pane fade show active" id="profile" role="tabpanel"
                                                     aria-labelledby="profile-tab">
-                                                    <?php var_dump($student)?>
                                                     <form action="<?= $_SERVER['PHP_SELF'] ?>" method="POST"
                                                         enctype="multipart/form-data" class="w-50 mx-auto">
                                                         <input type="hidden" name="change_profile"
