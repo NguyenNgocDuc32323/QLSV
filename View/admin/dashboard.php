@@ -6,6 +6,7 @@ if (session_status() == PHP_SESSION_NONE) {
 require_once '../../config/database.php';
 require_once '../../Controller/admin/DashboardController.php';
 require_once '../../Controller/admin/Room/RoomController.php';
+require_once '../../Controller/admin/RoomBill/RoomBillController.php';
 require_once '../../Controller/admin/contract/ContractController.php';
 if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
     header('Location: ../login.php');
@@ -28,16 +29,23 @@ $room = $dashboardController->showRoom();
 $contract = $dashboardController->showContract();
 $getallRoom = $roomController -> getAllRoom();
 $getallContract = $contractController -> getAllContract();
+$roomBillController = new RoomBillController($conn);
+$roomBill = $roomBillController -> getAllRoomBill();
 
 
 if (isset($_GET['search_rooms'])) {
     $searchString = htmlspecialchars($_GET['search_rooms']);
     $searchRoom = $roomController->searchRoom($searchString);
 }
-if (isset($_GET['search_contracts'])) {  // Change the parameter name to match 'search_contracts'
-    $searchString = htmlspecialchars($_GET['search_contracts']);  // Get the search term for contracts
-    $searchContract = $contractController->searchContract($searchString);  // Call searchContract instead of searchRoom
+if (isset($_GET['search_contracts'])) {  
+    $searchString = htmlspecialchars($_GET['search_contracts']);  
+    $searchContract = $contractController->searchContract($searchString);  
 }
+if (isset($_GET['search_roomBill'])) {  
+    $searchString = htmlspecialchars($_GET['search_roomBill']);  
+    $searchRoomBill = $roomBillController->searchRoomBill($searchString);  
+}
+
 
 
 if (isset($_GET['search_student'])) {
@@ -146,6 +154,54 @@ if (isset($_GET['delete_contract_id'])) {
         exit();
     }
 }
+if (isset($_GET['delete_room_bill_id'])) {
+    $room_bill_id = $_GET['delete_room_bill_id'];
+
+    // Ensure $room_bill_id is safe for use in SQL queries
+    $room_bill_id = mysqli_real_escape_string($conn, $room_bill_id);
+
+    // Xóa dữ liệu trong bảng chitiethoadon liên quan đến hóa đơn phòng
+    $delete_chitiethoadon = mysqli_query($conn, "
+        DELETE FROM chitiethoadon WHERE id = $room_bill_id
+    ");
+
+    if ($delete_chitiethoadon) {
+        // Lấy id_hoa_don từ bảng chitiethoadon
+        $get_hoadon_id_query = mysqli_query($conn, "
+            SELECT id_hoa_don FROM chitiethoadon WHERE id = $room_bill_id
+        ");
+
+        if ($get_hoadon_id_query && mysqli_num_rows($get_hoadon_id_query) > 0) {
+            $hoadon = mysqli_fetch_assoc($get_hoadon_id_query);
+            $hoadon_id = $hoadon['id_hoa_don'];
+
+            // Xóa hóa đơn trong bảng hoadon
+            $delete_hoadon = mysqli_query($conn, "
+                DELETE FROM hoadon WHERE id = $hoadon_id
+            ");
+
+            if ($delete_hoadon) {
+                echo "Room bill and related invoice deleted successfully!";
+                header("Location: ../../View/admin/dashboard.php?tab=transaction");
+                exit();
+            } else {
+                echo "Failed to delete invoice!";
+                header("Location: ../../View/admin/dashboard.php?tab=transaction");
+                exit();
+            }
+        } else {
+            echo "Failed to fetch the invoice ID for deletion!";
+            header("Location: ../../View/admin/dashboard.php?tab=transaction");
+            exit();
+        }
+    } else {
+        echo "Failed to delete room bill details!";
+        header("Location: ../../View/admin/dashboard.php?tab=transaction");
+        exit();
+    }
+}
+
+
 
 
 
@@ -483,6 +539,105 @@ if (isset($_GET['delete_contract_id'])) {
                                                     <a href="edit_contract.php?contract_id=<?php echo $row['hop_dong_id'];?>"
                                                         class="btn btn-success merge">Sửa</a>
                                                     <a href="dashboard.php?delete_contract_id=<?php echo $row['hop_dong_id'] ?>"
+                                                        class="btn btn-warning delete-btn-student">Xóa</a>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                            <?php else: ?>
+                                            <tr>
+                                                <td colspan="10">Không có dữ liệu.</td>
+                                            </tr>
+                                            <?php endif; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <ul class="to-top-list">
+
+                        </div>
+                    </div>
+                    <div id="content-transaction" class="content-tab" style="display: none;">
+                        <div class="p-4 main-content bg-success">
+                            <div class="d-flex align-items-center justify-content-between manage-prd-title">
+                                <h1 class="text-white fw-bold p-3 fw-700">Quản Lý Hóa Đơn Phòng</h1>
+                                <a href="create_contract.php" class="btn bg-white btn-add-admin">Thêm Hóa Đơn Phòng</a>
+                            </div>
+                            <div class="p-3 bg-white h-100 prd-list">
+                                <div class="d-flex justify-content-between align-items-center mb-3 card-body-item">
+                                    <div></div>
+
+                                    <form id="order-listing_filter" class="dataTables_filter" method="GET"
+                                        action="dashboard.php">
+                                        <input type="hidden" name="tab" value="transaction">
+                                        <input type="text" id="search_roomBill" name="search_roomBill"
+                                            class="form-control" placeholder="Search" value="<?php if (isset($_GET['search_roomBill'])) {
+                                                echo htmlspecialchars($_GET['search_roomBill']);
+                                            } ?>">
+                                        <button type="submit" class="btn-search">
+                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                        </button>
+                                    </form>
+
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table text-center">
+                                        <thead>
+                                            <tr>
+
+                                                <th>Tên phòng</th>
+                                                <th>Tháng</th>
+                                                <th>giá phòng</th>
+                                                <th>Phí dọn dẹp </th>
+
+                                                <th>tổng</th>
+                                                <th>Hành động</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php if (isset($searchRoomBill) && !empty($searchRoomBill)): ?>
+                                            <?php foreach ($searchRoomBill as $row): ?>
+                                            <tr>
+
+                                                <td><?php echo htmlspecialchars($row['ten_phong']); ?></td>
+
+                                                <td class="fw-bold table-name">
+                                                    <?php echo htmlspecialchars($row['thang']); ?></td>
+                                                <td><?php echo htmlspecialchars(    $row['gia_phong']); ?></td>
+                                                <td><?php echo $row['phi_don_dep'] ? $row['phi_don_dep'] : ""; ?>
+                                                </td>
+                                                <td class="fw-bold table-name">
+                                                    <?php echo htmlspecialchars($row['tong_phi']); ?></td>
+
+                                                <td class="d-flex align-items-center btn-dashboard-block">
+                                                    <a href="edit_room_bill.php?contract_id=<?php echo $row['id']; ?>"
+                                                        class="btn btn-success merge">Sửa</a>
+                                                    <a href="dashboard.php?delete_room_bill_id=<?php echo $row['id']; ?>"
+                                                        class="btn btn-warning delete-btn-student">Xóa</a>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                            <?php elseif (isset($searchRoom) && empty($searchRoom)): ?>
+                                            <tr>
+                                                <td colspan="10">Không có dữ liệu tìm kiếm.</td>
+                                            </tr>
+                                            <?php elseif (!empty($roomBill)): ?>
+                                            <?php foreach ($roomBill as $row): ?>
+
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($row['ten_phong']); ?></td>
+
+                                                <td class="fw-bold table-name">
+                                                    <?php echo htmlspecialchars($row['thang']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['gia_phong']); ?></td>
+                                                <td><?php echo $row['phi_don_dep'] ? $row['phi_don_dep'] : ""; ?>
+                                                </td>
+                                                <td class="fw-bold table-name">
+                                                    <?php echo htmlspecialchars($row['tong_phi']); ?></td>
+
+                                                <td class="d-flex align-items-center btn-dashboard-block">
+                                                    <a href="edit_room_bill.php?contract_id=<?php echo $row['id']; ?>"
+                                                        class="btn btn-success merge">Sửa</a>
+                                                    <a href="dashboard.php?delete_room_bill_id=<?php echo $row['id']; ?>"
                                                         class="btn btn-warning delete-btn-student">Xóa</a>
                                                 </td>
                                             </tr>
