@@ -6,7 +6,7 @@ if (session_status() == PHP_SESSION_NONE) {
 require_once '../../config/database.php';
 require_once '../../Controller/admin/DashboardController.php';
 require_once '../../Controller/admin/Room/RoomController.php';
-
+require_once '../../Controller/admin/contract/ContractController.php';
 if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
     header('Location: ../login.php');
 
@@ -22,15 +22,23 @@ $database = new Database();
 $conn = $database->connect();
 $dashboardController = new DashboardController($conn);
 $roomController = new RoomController($conn);
+$contractController = new ContractController($conn);
 $result = $dashboardController->showProfile();
 $room = $dashboardController->showRoom();
 $contract = $dashboardController->showContract();
 $getallRoom = $roomController -> getAllRoom();
+$getallContract = $contractController -> getAllContract();
+
 
 if (isset($_GET['search_rooms'])) {
     $searchString = htmlspecialchars($_GET['search_rooms']);
     $searchRoom = $roomController->searchRoom($searchString);
 }
+if (isset($_GET['search_contracts'])) {  // Change the parameter name to match 'search_contracts'
+    $searchString = htmlspecialchars($_GET['search_contracts']);  // Get the search term for contracts
+    $searchContract = $contractController->searchContract($searchString);  // Call searchContract instead of searchRoom
+}
+
 
 if (isset($_GET['search_student'])) {
     $searchString = htmlspecialchars($_GET['search_student']);
@@ -77,7 +85,6 @@ if (isset($_GET['delete_room_id'])) {
     $delete_room = mysqli_query($conn, "
         DELETE FROM phong WHERE id = $room_id
     ");
-
     if ($delete_room) {
         echo "Deleted room and related information successfully!";
         header("Location: ../../View/admin/dashboard.php?tab=category");
@@ -88,6 +95,60 @@ if (isset($_GET['delete_room_id'])) {
         exit();
     }
 } 
+if (isset($_GET['delete_contract_id'])) {
+    $contract_id = $_GET['delete_contract_id'];
+
+    // Xóa dữ liệu trong bảng thanhtoan liên quan đến hợp đồng
+    $delete_thanhtoan = mysqli_query($conn, "
+        DELETE FROM thanhtoan WHERE id_hop_dong = $contract_id
+    ");
+
+    if ($delete_thanhtoan) {
+        // Xóa dữ liệu trong bảng chitiethoadon liên quan đến hóa đơn
+        $delete_chitiethoadon = mysqli_query($conn, "
+            DELETE FROM chitiethoadon WHERE id_hoa_don IN (SELECT id FROM hoadon WHERE id_hop_dong = $contract_id)
+        ");
+
+        if ($delete_chitiethoadon) {
+            // Sau khi xóa dữ liệu trong chitiethoadon, xóa hóa đơn trong bảng hoadon
+            $delete_hoadon = mysqli_query($conn, "
+                DELETE FROM hoadon WHERE id_hop_dong = $contract_id
+            ");
+
+            if ($delete_hoadon) {
+                // Sau khi xóa hóa đơn, xóa hợp đồng trong bảng hopdong
+                $delete_contract = mysqli_query($conn, "
+                    DELETE FROM hopdong WHERE id = $contract_id
+                ");
+
+                if ($delete_contract) {
+                    echo "Deleted contract and related information successfully!";
+                    header("Location: ../../View/admin/dashboard.php?tab=account");
+                    exit();
+                } else {
+                    echo "Failed to delete contract!";
+                    header("Location: ../../View/admin/dashboard.php?tab=account");
+                    exit();
+                }
+            } else {
+                echo "Failed to delete related invoices!";
+                header("Location: ../../View/admin/dashboard.php?tab=account");
+                exit();
+            }
+        } else {
+            echo "Failed to delete related invoice details!";
+            header("Location: ../../View/admin/dashboard.php?tab=account");
+            exit();
+        }
+    } else {
+        echo "Failed to delete related payments!";
+        header("Location: ../../View/admin/dashboard.php?tab=account");
+        exit();
+    }
+}
+
+
+
 
 ?>
 <!DOCTYPE html>
@@ -252,11 +313,12 @@ if (isset($_GET['delete_room_id'])) {
                                         <tbody>
                                             <?php if (isset($searchRoom) && !empty($searchRoom)): ?>
                                             <?php foreach ($searchRoom as $row): ?>
+
                                             <tr>
                                                 <td><?php echo htmlspecialchars($row['ma_phong']); ?></td>
                                                 <td>
                                                     <img src="<?php echo '../assets/images/room/'.htmlspecialchars($row['anh_phong']); ?>"
-                                                    alt="Product Image" />
+                                                        alt="Product Image" />
                                                 </td>
                                                 <td class="fw-bold table-name">
                                                     <?php echo htmlspecialchars($row['tang']); ?></td>
@@ -321,73 +383,107 @@ if (isset($_GET['delete_room_id'])) {
 
                         </div>
                     </div>
-                    <div id="content-category" class="content-tab" style="display: none;">
+                    <div id="content-account" class="content-tab" style="display: none;">
                         <div class="p-4 main-content bg-success">
                             <div class="d-flex align-items-center justify-content-between manage-prd-title">
-
-                                <div id="content-account" class="content-tab p-4" style="display: none;">
-                                    <h1>Quản Lý Tài Khoản</h1>
-                                </div>
-                                <h1 class="text-white fw-bold p-3 fw-700">Quản Lý Phòng</h1>
-                                <button class="btn btn-success bg-white btn-add-prd">
-                                    Thêm Sản Phẩm
-                                </button>
-                            </div>
-                            <hr />
-                            <div class="input-group">
-                                <div class="form-outline" data-mdb-input-init>
-                                    <input type="search" id="form1" class="form-control" />
-                                    <label class="form-label" for="form1">Search</label>
-                                </div>
-                                <button type="button" class="btn btn-primary" data-mdb-ripple-init>
-                                    <i class="fas fa-search"></i>
-                                </button>
+                                <h1 class="text-white fw-bold p-3 fw-700">Quản Lý Hợp Đồng</h1>
+                                <a href="create_contract.php" class="btn bg-white btn-add-admin">Thêm Hợp Đồng</a>
                             </div>
                             <div class="p-3 bg-white h-100 prd-list">
+                                <div class="d-flex justify-content-between align-items-center mb-3 card-body-item">
+                                    <div></div>
+                                    <form id="order-listing_filter" class="dataTables_filter" method="GET"
+                                        action="dashboard.php">
+                                        <input type="hidden" name="tab" value="account">
+                                        <input type="text" id="search_contracts" name="search_contracts"
+                                            class="form-control" placeholder="Search" value="<?php if (isset($_GET['search_contracts'])) {
+                                                echo htmlspecialchars($_GET['search_contracts']);
+                                            } ?>">
+                                        <button type="submit" class="btn-search">
+                                            <i class="fa-solid fa-magnifying-glass"></i>
+                                        </button>
+                                    </form>
+
+                                </div>
                                 <div class="table-responsive">
                                     <table class="table text-center">
                                         <thead>
                                             <tr>
-                                                <th>Mã Sinh Viên</th>
-                                                <th>Avatar</th>
-                                                <th>Họ Và Tên</th>
-                                                <th>Năm sinh</th>
-                                                <th>CCCD</th>
-                                                <th>Giới Tính</th>
-                                                <th>Email</th>
-                                                <th>Số Điện Thoại</th>
-                                                <th>Quê Quán</th>
-                                                <th>Hành Động</th>
+                                                <th>Mã sinh viên</th>
+                                                <th>Tên phòng</th>
+                                                <th>Giá</th>
+                                                <th>Giá nước</th>
+                                                <th>Giá điện </th>
+                                                <th>Giá vệ sinh chung</th>
+                                                <th>Tiền đặt cọc</th>
+                                                <th>Ngày ký hợp đồng</th>
+                                                <th>Ngày bắt đầu</th>
+                                                <th>Ngày kết thúc</th>
+                                                <th>Ngày đặt cọc</th>
+                                                <th>Hành động</th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            <?php if (!empty($result)): ?>
-                                            <?php foreach ($result as $row): ?>
+                                            <?php if (isset($searchContract) && !empty($searchContract)): ?>
+                                            <?php foreach ($searchContract as $row): ?>
                                             <tr>
                                                 <td><?php echo htmlspecialchars($row['ma_sinh_vien']); ?></td>
-                                                <td>
-                                                    <img src="<?php echo '../assets/images/avatar/' . ($row['avatar'] ? ltrim($row['avatar'], './') : '../../View/assets/images/avatar/student_avatar.png'); ?>"
-                                                        alt="Product Image" />
+                                                <td><?php echo htmlspecialchars($row['ma_phong']); ?></td>
 
-                                                    <div id="content-transaction" class="content-tab p-4"
-                                                        style="display: none;">
-                                                        <h1>Quản Lý Giao Dịch</h1>
-                                                    </div>
+                                                <td class="fw-bold table-name">
+                                                    <?php echo htmlspecialchars($row['gia']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['gia_nuoc']); ?></td>
+                                                <td><?php echo $row['gia_dien'] ? $row['gia_dien'] : ""; ?>
                                                 </td>
-                                                <td><?php echo htmlspecialchars($row['ho_ten']); ?></td>
-                                                <td><?php echo htmlspecialchars($row['ngay_sinh']); ?></td>
-                                                <td><?php echo htmlspecialchars($row['so_cmnd']); ?></td>
-                                                <td>
-                                                    <?php echo htmlspecialchars($row['gioi_tinh']); ?>
+                                                <td><?php echo htmlspecialchars($row['gia_don_dep']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['tien_dat_coc']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['ngay_ky_hop_dong'] ?: ''); ?>
                                                 </td>
-                                                <td>
-                                                    <?php echo htmlspecialchars($row['email']); ?>
+                                                <td><?php echo htmlspecialchars($row['ngay_bat_dau'] ?: ''); ?>
                                                 </td>
-                                                <td><?php echo htmlspecialchars($row['so_dien_thoai'] ?: 'N/A'); ?></td>
-                                                <td><?php echo htmlspecialchars($row['que_quan'] ?: 'N/A'); ?></td>
-                                                <td class="d-flex align-items-center">
-                                                    <button class="btn btn-success merge">Sửa</button>
-                                                    <button class="btn btn-warning">Xóa</button>
+                                                <td><?php echo htmlspecialchars($row['ngay_ket_thuc'] ?: ''); ?>
+                                                </td>
+                                                <td><?php echo htmlspecialchars($row['ngay_dat_coc'] ?: ''); ?>
+                                                </td>
+                                                <td class="d-flex align-items-center btn-dashboard-block">
+                                                    <a href="edit_contract.php?contract_id=<?php echo $row['hop_dong_id'];?>"
+                                                        class="btn btn-success merge">Sửa</a>
+                                                    <a href="dashboard.php?delete_contract_id=<?php echo $row['hop_dong_id'] ?>"
+                                                        class="btn btn-warning delete-btn-student">Xóa</a>
+                                                </td>
+                                            </tr>
+                                            <?php endforeach; ?>
+                                            <?php elseif (isset($searchRoom) && empty($searchRoom)): ?>
+                                            <tr>
+                                                <td colspan="10">Không có dữ liệu tìm kiếm.</td>
+                                            </tr>
+                                            <?php elseif (!empty($getallContract)): ?>
+                                            <?php foreach ($getallContract as $row): ?>
+
+                                            <tr>
+                                                <td><?php echo htmlspecialchars($row['ma_sinh_vien']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['ma_phong']); ?></td>
+
+                                                <td class="fw-bold table-name">
+                                                    <?php echo htmlspecialchars($row['gia']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['gia_nuoc']); ?></td>
+                                                <td><?php echo $row['gia_dien'] ? $row['gia_dien'] : ""; ?>
+                                                </td>
+                                                <td><?php echo htmlspecialchars($row['gia_don_dep']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['tien_dat_coc']); ?></td>
+                                                <td><?php echo htmlspecialchars($row['ngay_ky_hop_dong'] ?: ''); ?>
+                                                </td>
+                                                <td><?php echo htmlspecialchars($row['ngay_bat_dau'] ?: ''); ?>
+                                                </td>
+                                                <td><?php echo htmlspecialchars($row['ngay_ket_thuc'] ?: ''); ?>
+                                                </td>
+                                                <td><?php echo htmlspecialchars($row['ngay_dat_coc'] ?: ''); ?>
+                                                </td>
+                                                <td class="d-flex align-items-center btn-dashboard-block">
+                                                    <a href="edit_contract.php?contract_id=<?php echo $row['hop_dong_id'];?>"
+                                                        class="btn btn-success merge">Sửa</a>
+                                                    <a href="dashboard.php?delete_contract_id=<?php echo $row['hop_dong_id'] ?>"
+                                                        class="btn btn-warning delete-btn-student">Xóa</a>
                                                 </td>
                                             </tr>
                                             <?php endforeach; ?>
@@ -397,12 +493,14 @@ if (isset($_GET['delete_room_id'])) {
                                             </tr>
                                             <?php endif; ?>
                                         </tbody>
-
                                     </table>
                                 </div>
                             </div>
+                            <ul class="to-top-list">
+
                         </div>
                     </div>
+
                 </div>
             </div>
 
