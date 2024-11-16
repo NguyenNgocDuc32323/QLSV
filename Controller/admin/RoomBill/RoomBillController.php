@@ -58,6 +58,11 @@ public function searchRoomBill(string $room) {
     // Return the search results
     return $searchDatas;
 }
+ public function createRoomBill($maPhong, $ngayThanhToan, $thang, $giaPhong, $phiDonDep){
+        $room = new RoomBill($this->conn);
+        return $room->createRoomBill($maPhong, $ngayThanhToan, $thang, $giaPhong, $phiDonDep);
+    }
+
 
     
 

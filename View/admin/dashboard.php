@@ -560,7 +560,7 @@ if (isset($_GET['delete_room_bill_id'])) {
                         <div class="p-4 main-content bg-success">
                             <div class="d-flex align-items-center justify-content-between manage-prd-title">
                                 <h1 class="text-white fw-bold p-3 fw-700">Quản Lý Hóa Đơn Phòng</h1>
-                                <a href="create_contract.php" class="btn bg-white btn-add-admin">Thêm Hóa Đơn Phòng</a>
+                                <a href="create_room_bill.php" class="btn bg-white btn-add-admin">Thêm Hóa Đơn Phòng</a>
                             </div>
                             <div class="p-3 bg-white h-100 prd-list">
                                 <div class="d-flex justify-content-between align-items-center mb-3 card-body-item">

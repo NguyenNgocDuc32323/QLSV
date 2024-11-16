@@ -159,6 +159,53 @@ GROUP BY
     }
 }
 
+public function createRoomBill($maPhong, $ngayThanhToan, $thang, $giaPhong, $phiDonDep) {
+    $query = "
+        INSERT INTO hoadon (id_phong, ngay_thanh_toan)
+        VALUES (?, ?);
+    ";
+
+    if ($stmt = $this->conn->prepare($query)) {
+        $stmt->bind_param("is", $maPhong, $ngayThanhToan);
+
+        if ($stmt->execute()) {
+            // Get the last inserted hoadon ID
+            $hoadonId = $this->conn->insert_id;
+
+            // Insert into chitiethoadon for 'Gia Phong'
+            $queryChiTietGiaPhong = "
+                INSERT INTO chitiethoadon (id_hoa_don, thang, loai_mon, so_tien)
+                VALUES (?, ?, 'Gia Phong', ?);
+            ";
+
+            if ($stmtChiTiet = $this->conn->prepare($queryChiTietGiaPhong)) {
+                $stmtChiTiet->bind_param("isd", $hoadonId, $thang, $giaPhong);
+                $stmtChiTiet->execute();
+                $stmtChiTiet->close();
+            }
+
+            // Insert into chitiethoadon for 'Phi Don Dep'
+            $queryChiTietPhiDonDep = "
+                INSERT INTO chitiethoadon (id_hoa_don, thang, loai_mon, so_tien)
+                VALUES (?, ?, 'Phi Don Dep', ?);
+            ";
+
+            if ($stmtChiTiet = $this->conn->prepare($queryChiTietPhiDonDep)) {
+                $stmtChiTiet->bind_param("isd", $hoadonId, $thang, $phiDonDep);
+                $stmtChiTiet->execute();
+                $stmtChiTiet->close();
+            }
+
+            return true; // Success
+        } else {
+            echo "Error executing insert into hoadon: " . $this->conn->error;
+            return false; // Error during execution
+        }
+    } else {
+        echo "Error preparing statement: " . $this->conn->error;
+        return false; // Error preparing the statement
+    }
+}
 
 
 
