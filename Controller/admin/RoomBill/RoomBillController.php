@@ -24,19 +24,18 @@ class RoomBillController{
     return $roomBill_data;
 }
 
-public function updateRoomBill($contract_id, $roomCode, $paymentDate, $month, $newRoomPrice, $newCleaningFee) {
+public function updateRoomBill($room_bill_id, $ten_phong, $so_nuoc_cu,$so_nuoc_moi,$so_dien_cu,$so_dien_moi,$ngayThanhToan,$ghiChu) {
     if (!isset($_SESSION['login'])) {
         header('Location: ../login.php');
         exit();
     }
-
     $roomBillModel = new RoomBill($this->conn);
-    return $roomBillModel->updateRoomBill(
-        $roomCode, $paymentDate, $month, $newRoomPrice, $newCleaningFee, $contract_id
-    );
+    $checkUpdate = $roomBillModel->updateRoomBill($room_bill_id, $ten_phong, $so_nuoc_cu,$so_nuoc_moi,$so_dien_cu,$so_dien_moi,$ngayThanhToan,$ghiChu);
+
+    return $checkUpdate;
 }
 public function getRoom(){
-     $roomModel = new RoomBill($this->conn);
+        $roomModel = new RoomBill($this->conn);
         $room_data = $roomModel->getRoom();
 
         if (!$room_data) {
@@ -45,23 +44,17 @@ public function getRoom(){
 
         return $room_data;
 }
-public function searchRoomBill(string $room) {
-    // Instantiate the RoomBill model
+public function searchRoomBill($search) {
     $roomBillModel = new RoomBill($this->conn);
-
-    // Prepare the search data as an array with the expected format
-    $searchParams = ['search_term' => $room];
-
-    // Call the model's searchRoomBill method, passing the array instead of a string
-    $searchDatas = $roomBillModel->searchRoomBill($searchParams);
-
-    // Return the search results
+    $searchDatas = $roomBillModel->searchRoomBill($search);
     return $searchDatas;
 }
- public function createRoomBill($maPhong, $ngayThanhToan, $thang, $giaPhong, $phiDonDep){
-        $room = new RoomBill($this->conn);
-        return $room->createRoomBill($maPhong, $ngayThanhToan, $thang, $giaPhong, $phiDonDep);
-    }
+public function createRoomBill($maPhong, $soNuocCu, $soNuocMoi, $soDienCu, $soDienMoi, $ngayThanhToan,$ghiChu) {
+    $room = new RoomBill($this->conn);
+    $checkCreate =  $room->createRoomBill($maPhong, $soNuocCu, $soNuocMoi, $soDienCu, $soDienMoi, $ngayThanhToan,$ghiChu);
+    return $checkCreate;
+}
+
 
 
     
