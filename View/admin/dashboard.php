@@ -2,10 +2,20 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-
+if (isset($_SESSION['success'])) {
+    $message = json_encode($_SESSION['success']);
+    echo "<script> alert($message); </script>";
+    unset($_SESSION['success']);
+}
+if (isset($_SESSION['error'])) {
+    $message = json_encode($_SESSION['error']);
+    echo "<script> alert($message); </script>";
+    unset($_SESSION['error']);
+}
 require_once '../../config/database.php';
 require_once '../../Controller/admin/DashboardController.php';
 require_once '../../Controller/admin/Room/RoomController.php';
+require_once '../../Controller/admin/Payment/PaymentController.php';
 require_once '../../Controller/admin/RoomBill/RoomBillController.php';
 require_once '../../Controller/admin/contract/ContractController.php';
 if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
@@ -16,7 +26,6 @@ if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
 
 if (isset($_SESSION['vai_tro']) && $_SESSION['vai_tro'] !== 'Quan Tri Vien') {
     header('Location: ../index.php');
-
     exit();
 }
 $database = new Database();
@@ -24,15 +33,15 @@ $conn = $database->connect();
 $dashboardController = new DashboardController($conn);
 $roomController = new RoomController($conn);
 $contractController = new ContractController($conn);
+$roomBillController = new RoomBillController($conn);
+$paymentController = new PaymentController($conn);
 $result = $dashboardController->showProfile();
 $room = $dashboardController->showRoom();
 $contract = $dashboardController->showContract();
 $getallRoom = $roomController->getAllRoom();
 $getallContract = $contractController->getAllContract();
-$roomBillController = new RoomBillController($conn);
 $roomBill = $roomBillController->getAllRoomBill();
-
-
+$payments = $paymentController->getAllPayment();
 if (isset($_GET['search_rooms'])) {
     $searchString = htmlspecialchars($_GET['search_rooms']);
     $searchRoom = $roomController->searchRoom($searchString);
@@ -44,6 +53,10 @@ if (isset($_GET['search_contracts'])) {
 if (isset($_GET['search_roomBill'])) {
     $searchString = htmlspecialchars($_GET['search_roomBill']);
     $searchRoomBill = $roomBillController->searchRoomBill($searchString);
+}
+if (isset($_GET['search_payment'])) {
+    $searchPaymentString = htmlspecialchars($_GET['search_payment']);
+    $searcPayments = $paymentController->searchPayment($searchPaymentString);
 }
 
 
@@ -178,7 +191,20 @@ if (isset($_GET['delete_room_bill_id'])) {
         exit();
     }
 }
-
+if(isset($_GET['delete_payment_id'])){
+    $payment_id = $_GET['delete_payment_id'];
+    $delete_payment = $paymentController->deletePayment($payment_id);
+    if($delete_payment){
+        echo "Thanh toán đã được xóa thành công!";
+        header("Location:../../View/admin/dashboard.php?tab=delivery");
+        exit();
+    }
+    else{
+        echo "Xóa thanh toán không thành công!";
+        header("Location:../../View/admin/dashboard.php?tab=delivery");
+        exit();
+    }
+}
 
 
 ?>
@@ -540,7 +566,7 @@ if (isset($_GET['delete_room_bill_id'])) {
                         <div class="p-3 bg-white h-100 prd-list">
                             <div class="d-flex justify-content-between align-items-center mb-3 card-body-item">
                                 <div></div>
-                                <form id="order-listing_filter" class="dataTables_filter" method="GET" action="dashboard.php">
+                                <form id="order-listing_filter" class="dataTables_filter" method="GET" action="dashboard.php?tab=transaction">
                                     <input type="hidden" name="tab" value="transaction">
                                     <input type="text" id="search_roomBill" name="search_roomBill" class="form-control" placeholder="Search" value="<?php echo isset($_GET['search_roomBill']) ? htmlspecialchars($_GET['search_roomBill']) : ''; ?>">
                                     <button type="submit" class="btn-search">
@@ -606,7 +632,81 @@ if (isset($_GET['delete_room_bill_id'])) {
                             </div>
                         </div>
                     </div>
-                </div>                           
+                </div>
+                <div id="content-delivery" class="content-tab" style="display: none;">
+                    <div class="p-4 main-content bg-success">
+                        <div class="d-flex align-items-center justify-content-between manage-prd-title">
+                            <h1 class="text-white fw-bold p-3 fw-700">Quản Lý Thanh Toán</h1>
+                            <a href="create_payment.php" class="btn bg-white btn-add-admin">Thêm Thanh Toán</a>
+                        </div>
+                        <div class="p-3 bg-white h-100 prd-list">
+                            <div class="d-flex justify-content-between align-items-center mb-3 card-body-item">
+                                <div></div>
+                                <form id="order-listing_filter" class="dataTables_filter" method="GET" action="dashboard.php?tab=delivery">
+                                    <input type="hidden" name="tab" value="delivery">
+                                    <input type="text" id="search_payment" name="search_payment" class="form-control" placeholder="Search" value="<?php echo isset($_GET['search_payment']) ? htmlspecialchars($_GET['search_payment']) : ''; ?>">
+                                    <button type="submit" class="btn-search">
+                                        <i class="fa-solid fa-magnifying-glass"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="table-responsive">
+                                <table class="table text-center">
+                                    <thead>
+                                        <tr>
+                                            <th>Tên phòng</th>
+                                            <th>Số Tiền</th>
+                                            <th>Tên Học Sinh</th>
+                                            <th>Phương Thức Thanh Toán</th>
+                                            <th>Ngày Thanh Toán</th>
+                                            <th>Trạng Thái</th>
+                                            <th>Hành động</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!empty($searcPayments)): ?>
+                                            <?php foreach ($searcPayments as $row): ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($row['ten_phong']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['so_tien']); ?></td>
+                                                    <td><?php echo $row['ho_ten']; ?></td>
+                                                    <td><?php echo $row['phuong_thuc_thanh_toan']; ?></td>
+                                                    <td><?php echo $row['ngay_tra_tien']; ?></td>
+                                                    <td><?php echo $row['trang_thai']; ?></td>
+                                                    <td class="d-flex align-items-center btn-dashboard-block">
+                                                        <a href="edit_payment.php?payment_id=<?php echo $row['thanh_toan_id']; ?>" class="btn btn-success merge">Sửa</a>
+                                                        <a href="dashboard.php?delete_payment_id=<?php echo $row['thanh_toan_id']; ?>" class="btn btn-warning delete-btn-student">Xóa</a>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php elseif (!empty($payments)): ?>
+                                            <?php foreach ($payments as $row): ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($row['ten_phong']); ?></td>
+                                                    <td><?php echo htmlspecialchars($row['so_tien']); ?></td>
+                                                    <td><?php echo $row['ho_ten']; ?></td>
+                                                    <td><?php echo $row['phuong_thuc_thanh_toan']; ?></td>
+                                                    <td><?php echo $row['ngay_tra_tien']; ?></td>
+                                                    <td><?php echo $row['trang_thai']; ?></td>
+                                                    <td class="d-flex align-items-center btn-dashboard-block">
+                                                        <a href="edit_payment.php?payment_id=<?php echo $row['thanh_toan_id']; ?>" class="btn btn-success merge">Sửa</a>
+                                                        <a href="dashboard.php?delete_payment_id=<?php echo $row['thanh_toan_id']; ?>" class="btn btn-warning delete-btn-student">Xóa</a>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr>
+                                                <td colspan="7">Không có dữ liệu.</td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
