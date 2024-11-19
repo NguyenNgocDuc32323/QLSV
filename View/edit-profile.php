@@ -2,16 +2,6 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-if (isset($_SESSION['success'])) {
-    $message = json_encode($_SESSION['success']);
-    echo "<script> alert($message); </script>";
-    unset($_SESSION['success']);
-}
-if (isset($_SESSION['error'])) {
-    $message = json_encode($_SESSION['error']);
-    echo "<script> alert($message); </script>";
-    unset($_SESSION['error']);
-}
 
 // Kiểm tra người dùng đã đăng nhập chưa
 if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {

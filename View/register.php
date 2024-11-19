@@ -1,15 +1,5 @@
 <?php
 session_start();
-if (isset($_SESSION['success'])) {
-    $message = json_encode($_SESSION['success']);
-    echo "<script> alert($message); </script>";
-    unset($_SESSION['success']);
-}
-if (isset($_SESSION['error'])) {
-    $message = json_encode($_SESSION['error']);
-    echo "<script> alert($message); </script>";
-    unset($_SESSION['error']);
-}
 
 require_once '../Controller/RegisterController.php'; // Include RegisterController file
 require_once '../config/database.php';
@@ -23,7 +13,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $registerController = new RegisterController();
     $registerController->register($conn);
 }
+// Check if there are errors in the session and display them
 if (isset($_SESSION['errors'])) {
+    // Display the errors for debugging (var_dump)
+    // echo "<pre>";
+    // var_dump($_SESSION['errors']);
+    // echo "</pre>";
+
+    // Display the errors in the form
     $errors = $_SESSION['errors'];
 } else {
     $errors = [];

@@ -4,17 +4,6 @@ if (!isset($_SESSION['is_logged_in']) || $_SESSION['is_logged_in'] !== true) {
     header('Location: ../login.php');
     exit();
 }
-if (isset($_SESSION['success'])) {
-    $message = json_encode($_SESSION['success']);
-    echo "<script> alert($message); </script>";
-    unset($_SESSION['success']);
-}
-if (isset($_SESSION['error'])) {
-    $message = json_encode($_SESSION['error']);
-    echo "<script> alert($message); </script>";
-    unset($_SESSION['error']);
-}
-
 require_once '../../config/database.php';
 require_once '../../Controller/admin/Room/RoomController.php';
 require_once '../../Controller/admin/DashboardController.php';
@@ -89,10 +78,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_profile'])) {
                     <div class="container-fluid flex-grow-1 container-p-y">
                         <div class="dashboard-main-body">
                             <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-24 mt-4">
-                                <h1 class="text-white fw-semibold mb-0 body-title">Cập Nhật Phòng</h1>
+                                <h1 class="fw-semibold mb-0 body-title">Cập Nhật Sinh Viên</h1>
                                 <ul class="d-flex align-items-center gap-2">
                                     <li class="fw-medium">
-                                        <a href="index.php" class="text-white d-flex align-items-center gap-1 hover-text-primary">
+                                        <a href="index.php" class="d-flex align-items-center gap-1 hover-text-primary">
                                             <i class="fa-solid fa-house"></i>
                                             Trang Chủ
                                         </a>

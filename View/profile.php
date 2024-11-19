@@ -2,17 +2,6 @@
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
-if (isset($_SESSION['success'])) {
-    $message = json_encode($_SESSION['success']);
-    echo "<script> alert($message); </script>";
-    unset($_SESSION['success']);
-}
-if (isset($_SESSION['error'])) {
-    $message = json_encode($_SESSION['error']);
-    echo "<script> alert($message); </script>";
-    unset($_SESSION['error']);
-}
-
 require_once '../config/database.php';
 require_once '../Controller/ProfileController.php';
 $database = new Database();

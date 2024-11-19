@@ -31,7 +31,7 @@
             <li class="nav-item bg-success" id="tab-delivery">
                 <a href="dashboard.php?tab=delivery" class="nav-link text-white">
                     <i class="fa-solid fa-truck-fast me-2"></i>
-                    Quản Lý Thanh Toán
+                    Hóa Đơn Điện Nước
                 </a>
             </li>
 

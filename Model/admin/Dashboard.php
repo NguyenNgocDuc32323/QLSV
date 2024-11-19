@@ -104,6 +104,8 @@ class Dashboard {
                 hoadon.id_hop_dong AS ma_hop_dong,
                 hoadon.ngay_thanh_toan,
                 hoadon.so_thang,
+                MAX(CASE WHEN chitiethoadon.loai_mon = 'Gia Phong' THEN chitiethoadon.so_tien ELSE 0 END) AS tien_phong,
+                MAX(CASE WHEN chitiethoadon.loai_mon = 'Phi Don Dep' THEN chitiethoadon.so_tien ELSE 0 END) AS tien_ve_sinh,
                 hoadon.tong_so_tien,
                 hoadon.nhan_vien_phu_trach
             FROM 
