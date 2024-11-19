@@ -7,6 +7,17 @@ if (isset($_SESSION['login_success']) && $_SESSION['login_success']) {
     echo "<script class='text-success'>alert('{$login_success}');</script>";
     unset($_SESSION['login_success']);
 }
+if (isset($_SESSION['success'])) {
+    $message = json_encode($_SESSION['success']);
+    echo "<script> alert($message); </script>";
+    unset($_SESSION['success']);
+}
+if (isset($_SESSION['error'])) {
+    $message = json_encode($_SESSION['error']);
+    echo "<script> alert($message); </script>";
+    unset($_SESSION['error']);
+}
+
 ?>
 
 <!DOCTYPE html>

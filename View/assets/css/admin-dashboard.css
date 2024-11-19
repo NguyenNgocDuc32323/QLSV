@@ -268,3 +268,6 @@
 .btn-add-admin:hover{
     color: #45BF55;
 }
+.text-white{
+    color: #fff !important;
+}
