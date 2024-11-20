@@ -82,8 +82,7 @@ class Paymnent {
         $query = "
             SELECT p.id, p.ma_phong 
             FROM phong p
-            LEFT JOIN hopdong hd ON p.id = hd.id_phong
-            LEFT JOIN thanhtoan tt ON hd.id = tt.id_hop_dong
+            LEFT JOIN thanhtoan tt ON p.id = tt.id_phong
             GROUP BY p.id, p.ma_phong, p.suc_chua_toi_da
             HAVING 
                 COUNT(tt.id) < p.suc_chua_toi_da

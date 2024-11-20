@@ -7,7 +7,7 @@ class Profile {
     public function getProfileData($id_nguoidung) {
         $query = "
             SELECT 
-                nguoidung.ho_ten, nguoidung.email, nguoidung.so_dien_thoai, nguoidung.ngay_sinh, nguoidung.gioi_tinh, nguoidung.avatar,
+                nguoidung.ho_ten, nguoidung.email, nguoidung.so_dien_thoai, nguoidung.ngay_sinh, nguoidung.gioi_tinh, nguoidung.avatar,nguoidung.vai_tro,
                 hocsinh.ma_sinh_vien, hocsinh.so_cmnd, hocsinh.que_quan
             FROM 
                 nguoidung
@@ -31,71 +31,139 @@ class Profile {
         }
     }
 
-    public function updateProfileData($userId, $fullName, $email, $phone, $birthYear, $gender, $idNumber, $hometown, $avatar) {
-        // Xử lý giới tính
-        if ($gender === 'male') {
-            $gender = 'Nam';
-        } elseif ($gender === 'female') {
-            $gender = 'Nữ';  // Chỉnh lại từ 'Nu' thành 'Nữ' để chuẩn hóa tiếng Việt
-        } elseif ($gender === 'other') {
-            $gender = 'Khác';
-        } else {
-            $gender = 'Khác';
+    public function updateProfileData($userId, $fullName, $email, $phone, $birthYear, $gender, $idNumber = null, $hometown = null, $avatar = null) {
+        // Chuẩn hóa giới tính
+        switch ($gender) {
+            case 'male':
+                $gender = 'Nam';
+                break;
+            case 'female':
+                $gender = 'Nữ';
+                break;
+            case 'other':
+            default:
+                $gender = 'Khác';
+                break;
         }
     
-        // Kiểm tra nếu có ảnh đại diện mới
-        if ($avatar) {
+        // Kiểm tra vai trò người dùng
+        $userRole = $this->getUserRole($userId); // Hàm lấy vai trò người dùng
+        if ($userRole === 'Quan Tri Vien') {
+            // Nếu vai trò là Quản Trị Viên, chỉ cập nhật bảng nguoidung
             $query = "
-                UPDATE nguoidung AS nd
-                JOIN hocsinh AS hs ON nd.id = hs.id_nguoi_dung
+                UPDATE nguoidung 
                 SET 
-                    nd.ho_ten = ?, 
-                    nd.email = ?, 
-                    nd.so_dien_thoai = ?, 
-                    nd.ngay_sinh = ?, 
-                    nd.gioi_tinh = ?, 
-                    nd.avatar = ?, 
-                    hs.so_cmnd = ?, 
-                    hs.que_quan = ? 
+                    ho_ten = ?, 
+                    email = ?, 
+                    so_dien_thoai = ?, 
+                    ngay_sinh = ?, 
+                    gioi_tinh = ?, 
+                    avatar = ?
                 WHERE 
-                    nd.id = ?
+                    id = ?
             ";
-        } else {
-            $query = "
-                UPDATE nguoidung AS nd
-                JOIN hocsinh AS hs ON nd.id = hs.id_nguoi_dung
-                SET 
-                    nd.ho_ten = ?, 
-                    nd.email = ?, 
-                    nd.so_dien_thoai = ?, 
-                    nd.ngay_sinh = ?, 
-                    nd.gioi_tinh = ?, 
-                    hs.so_cmnd = ?, 
-                    hs.que_quan = ? 
-                WHERE 
-                    nd.id = ?
-            ";
-        }
     
-        // Chuẩn bị và thực thi câu lệnh SQL
-        if ($stmt = $this->conn->prepare($query)) {
-            // Nếu có ảnh, gắn tham số cho trường avatar
+            if ($stmt = $this->conn->prepare($query)) {
+                $stmt->bind_param("ssssssi", $fullName, $email, $phone, $birthYear, $gender, $avatar, $userId);
+    
+                if ($stmt->execute()) {
+                    return true; // Thành công
+                } else {
+                    echo "Lỗi SQL: " . $stmt->error;
+                    return false;
+                }
+            } else {
+                echo "Lỗi chuẩn bị SQL: " . $this->conn->error;
+                return false;
+            }
+        } else {
+            // Nếu không phải Quản Trị Viên, cập nhật cả bảng nguoidung và hocsinh
             if ($avatar) {
-                $stmt->bind_param("ssssssssi", $fullName, $email, $phone, $birthYear, $gender, $avatar, $idNumber, $hometown, $userId);
+                $query = "
+                    UPDATE nguoidung AS nd
+                    JOIN hocsinh AS hs ON nd.id = hs.id_nguoi_dung
+                    SET 
+                        nd.ho_ten = ?, 
+                        nd.email = ?, 
+                        nd.so_dien_thoai = ?, 
+                        nd.ngay_sinh = ?, 
+                        nd.gioi_tinh = ?, 
+                        nd.avatar = ?, 
+                        hs.so_cmnd = ?, 
+                        hs.que_quan = ? 
+                    WHERE 
+                        nd.id = ?
+                ";
             } else {
-                $stmt->bind_param("sssssssi", $fullName, $email, $phone, $birthYear, $gender, $idNumber, $hometown, $userId);
+                $query = "
+                    UPDATE nguoidung AS nd
+                    JOIN hocsinh AS hs ON nd.id = hs.id_nguoi_dung
+                    SET 
+                        nd.ho_ten = ?, 
+                        nd.email = ?, 
+                        nd.so_dien_thoai = ?, 
+                        nd.ngay_sinh = ?, 
+                        nd.gioi_tinh = ?, 
+                        hs.so_cmnd = ?, 
+                        hs.que_quan = ? 
+                    WHERE 
+                        nd.id = ?
+                ";
             }
     
-            // Thực thi câu lệnh SQL và kiểm tra kết quả
-            if ($stmt->execute()) {
-                return true;  // Thành công
+            if ($stmt = $this->conn->prepare($query)) {
+                if ($avatar) {
+                    $stmt->bind_param(
+                        "ssssssssi",
+                        $fullName,
+                        $email,
+                        $phone,
+                        $birthYear,
+                        $gender,
+                        $avatar,
+                        $idNumber,
+                        $hometown,
+                        $userId
+                    );
+                } else {
+                    $stmt->bind_param(
+                        "sssssssi",
+                        $fullName,
+                        $email,
+                        $phone,
+                        $birthYear,
+                        $gender,
+                        $idNumber,
+                        $hometown,
+                        $userId
+                    );
+                }
+    
+                if ($stmt->execute()) {
+                    return true; // Thành công
+                } else {
+                    echo "Lỗi SQL: " . $stmt->error;
+                    return false;
+                }
             } else {
-                return false; // Lỗi khi thực thi
+                echo "Lỗi chuẩn bị SQL: " . $this->conn->error;
+                return false;
             }
-        } else {
-            return false;  // Lỗi khi chuẩn bị câu lệnh
         }
     }
+    
+    // Hàm hỗ trợ lấy vai trò người dùng
+    private function getUserRole($userId) {
+        $query = "SELECT vai_tro FROM nguoidung WHERE id = ?";
+        if ($stmt = $this->conn->prepare($query)) {
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $result = $stmt->get_result()->fetch_assoc();
+            return $result['vai_tro'] ?? null;
+        }
+        return null;
+    }
+    
     
 
     public function updatePassword($userId, $currentPassword, $newPassword) {
@@ -144,23 +212,23 @@ class Profile {
 
         return false;
     }
-public function checkCurrentPassword($userId, $currentPassword) {
-    // Giả sử bạn đã mã hóa mật khẩu trong cơ sở dữ liệu
-    $query = "SELECT mat_khau FROM nguoidung WHERE id = ?";
-    $stmt = $this->conn->prepare($query);
-    $stmt->bind_param("i", $userId); // "i" để bind integer
-    $stmt->execute();
+    public function checkCurrentPassword($userId, $currentPassword) {
+        // Giả sử bạn đã mã hóa mật khẩu trong cơ sở dữ liệu
+        $query = "SELECT mat_khau FROM nguoidung WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param("i", $userId); // "i" để bind integer
+        $stmt->execute();
 
-    $result = $stmt->get_result()->fetch_assoc(); // Lấy kết quả truy vấn
+        $result = $stmt->get_result()->fetch_assoc(); // Lấy kết quả truy vấn
 
-    if ($result) {
-        // Kiểm tra mật khẩu hiện tại có khớp không
-        if (password_verify($currentPassword, $result['mat_khau'])) {
-            return true;
+        if ($result) {
+            // Kiểm tra mật khẩu hiện tại có khớp không
+            if (password_verify($currentPassword, $result['mat_khau'])) {
+                return true;
+            }
         }
+        return false;
     }
-    return false;
-}
 
 
 

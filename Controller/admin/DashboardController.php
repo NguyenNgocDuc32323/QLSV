@@ -22,12 +22,19 @@ class DashboardController {
         $roomModel = new Dashboard($this->conn);
         $room_data = $roomModel->getRoomData(); // Call the method without passing an ID
 
+        if (!$room_data) {
+            $_SESSION['login_failure'] = "Không tìm thấy dữ liệu người dùng.";
+        }
 
         return $room_data;
     }
     public function showContract() {
         $contractModel = new Dashboard($this->conn);
         $contract_data = $contractModel->getContractData(); // Call the method without passing an ID
+
+        if (!$contract_data) {
+            $_SESSION['login_failure'] = "Không tìm thấy dữ liệu người dùng.";
+        }
 
         return $contract_data;
     }
