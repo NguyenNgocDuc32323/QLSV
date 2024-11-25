@@ -103,19 +103,60 @@ if (isset($_GET['delete_student_id'])) {
 
 if (isset($_GET['delete_room_id'])) {
     $room_id = $_GET['delete_room_id'];
-    $delete_room = mysqli_query($conn, "
-        DELETE FROM phong WHERE id = $room_id
+
+    // Bước 1: Xóa chi tiết hóa đơn
+    $delete_invoice_details = mysqli_query($conn, "
+        DELETE FROM chitiethoadon 
+        WHERE id_hoa_don IN (
+            SELECT id FROM hoadon WHERE id_phong = $room_id
+        )
     ");
-    if ($delete_room) {
-        echo "Deleted room and related information successfully!";
-        header("Location: ../../View/admin/dashboard.php?tab=category");
-        exit();
+
+    if ($delete_invoice_details) {
+        // Bước 2: Xóa hóa đơn liên quan
+        $delete_invoices = mysqli_query($conn, "
+            DELETE FROM hoadon WHERE id_phong = $room_id
+        ");
+
+        if ($delete_invoices) {
+            // Bước 3: Xóa hợp đồng liên quan
+            $delete_contracts = mysqli_query($conn, "
+                DELETE FROM hopdong WHERE id_phong = $room_id
+            ");
+
+            if ($delete_contracts) {
+                // Bước 4: Xóa phòng
+                $delete_room = mysqli_query($conn, "
+                    DELETE FROM phong WHERE id = $room_id
+                ");
+
+                if ($delete_room) {
+                    echo "Deleted room and all related data successfully!";
+                    header("Location: ../../View/admin/dashboard.php?tab=category");
+                    exit();
+                } else {
+                    echo "Failed to delete room!";
+                    header("Location: ../../View/admin/dashboard.php?tab=category");
+                    exit();
+                }
+            } else {
+                echo "Failed to delete related contracts!";
+                header("Location: ../../View/admin/dashboard.php?tab=category");
+                exit();
+            }
+        } else {
+            echo "Failed to delete related invoices!";
+            header("Location: ../../View/admin/dashboard.php?tab=category");
+            exit();
+        }
     } else {
-        echo "Failed to delete room!";
+        echo "Failed to delete related invoice details!";
         header("Location: ../../View/admin/dashboard.php?tab=category");
         exit();
     }
 }
+
+
 if (isset($_GET['delete_contract_id'])) {
     $contract_id = $_GET['delete_contract_id'];
     $delete_chitiethoadon = mysqli_query($conn, "
