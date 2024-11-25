@@ -29,9 +29,9 @@ if (isset($_GET['payment_id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_payment'])) {
     $payment_id = $_POST['payment_id'];
     $ten_phong = $_POST['id_phong'];
-    $so_tien = $_POST['so_tien']; 
-    $id_hoc_sinh = $_POST['id_hoc_sinh']; 
-    $method = $_POST['phuong_thuc_thanh_toan']; 
+    $so_tien = $_POST['so_tien'];
+    $id_hoc_sinh = $_POST['id_hoc_sinh'];
+    $method = $_POST['phuong_thuc_thanh_toan'];
     $ngay_thanh_toan = $_POST['ngay_thanh_toan'];
     $trang_thai = $_POST['trang_thai'];
     $students = $paymentController->getStudent();
@@ -136,11 +136,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_payment'])) {
 
                                                     <div class="form-group">
                                                         <label for="trang_thai">Trạng Thái:</label>
-                                                        <select name="trang_thai" id="trang_thai" class="form-control" required>
+                                                        <select name="trang_thai" id="trang_thai" class="form-control" required <?php echo ($payment['trang_thai'] == 'Hoan Thanh') ? 'disabled' : ''; ?>>
                                                             <option value="Hoan Thanh" <?php echo ($payment['trang_thai'] == 'Hoan Thanh') ? 'selected' : ''; ?>>Đã Thanh Toán</option>
                                                             <option value="Cho Xu Ly" <?php echo ($payment['trang_thai'] == 'Cho Xu Ly') ? 'selected' : ''; ?>>Đang Xử Lý</option>
                                                         </select>
                                                     </div>
+
 
                                                     <button type="submit" class="btn btn-success">Tạo Thanh Toán</button>
                                                 </form>
