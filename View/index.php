@@ -40,6 +40,8 @@ if (isset($_SESSION['error'])) {
     </head>
 
     <body>
+        
+        </div>
         <div class="main-background">
             <div class="main-container">
                 <div class="text-main">
@@ -77,6 +79,10 @@ if (isset($_SESSION['error'])) {
                                 <div id="text-guide-model3d">Quản Lý Ký Túc Xá</div>
                             </a>
                             <?php endif; ?>
+                            <a href="home.php" class="tutorial-body-bottom-item">
+                                <i class="far fa-edit"></i>
+                                <div id="text-guide-model3d">đặt phòng</div>
+                            </a>
                             <a href="profile.php" class="tutorial-body-bottom-item">
                                 <i class="far fa-edit"></i>
                                 <div id="text-guide-model3d">Chỉnh Sửa Cá Nhân</div>
